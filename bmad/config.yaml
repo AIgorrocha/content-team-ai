@@ -1,0 +1,12 @@
+project_name: "Content Team AI"
+project_type: "web-app"
+project_level: 3
+
+output_folder: "docs"
+stories_folder: "docs/stories"
+
+workflow_status_file: "docs/bmm-workflow-status.yaml"
+sprint_status_file: "docs/sprint-status.yaml"
+
+communication_language: "Portuguese"
+output_language: "Portuguese"
