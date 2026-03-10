@@ -1,4 +1,4 @@
-import type { DashboardStats, Agent, Task } from "@/lib/types"
+import type { DashboardStats, Agent, Task, ContentItem, PaginatedResponse } from "@/lib/types"
 import type { AgentWithTaskCount, AgentDetail } from "@/lib/queries/agents"
 
 async function apiCall<T>(path: string, options?: RequestInit): Promise<T> {
@@ -23,5 +23,17 @@ export const api = {
   agents: {
     list: () => apiCall<AgentWithTaskCount[]>("/agents"),
     get: (slug: string) => apiCall<AgentDetail>(`/agents/${slug}`),
+  },
+  content: {
+    list: (params?: Record<string, string>) => {
+      const qs = params ? `?${new URLSearchParams(params)}` : ""
+      return apiCall<PaginatedResponse<ContentItem>>(`/content${qs}`)
+    },
+    get: (id: string) => apiCall<ContentItem>(`/content/${id}`),
+    update: (id: string, data: Partial<ContentItem>) =>
+      apiCall<ContentItem>(`/content/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
   },
 }

@@ -1,12 +1,12 @@
 project: "Content Team AI"
-current_sprint: 1
-sprint_start: "2026-03-10"
-sprint_end: "2026-03-24"
+current_sprint: 2
+sprint_start: "2026-03-24"
+sprint_end: "2026-04-07"
 velocity_target: 24
 
 sprints:
   - number: 1
-    status: "in-progress"
+    status: "completed"
     goal: "Foundation & Core Infrastructure"
     stories:
       - id: "STORY-001"
@@ -33,9 +33,26 @@ sprints:
     completed_points: 24
 
   - number: 2
-    status: "planned"
+    status: "completed"
     goal: "Content Management"
+    stories:
+      - id: "STORY-005"
+        title: "Content Calendar"
+        points: 8
+        status: "completed"
+        completed_at: "2026-03-10"
+      - id: "STORY-006"
+        title: "Content List & Filters"
+        points: 8
+        status: "completed"
+        completed_at: "2026-03-10"
+      - id: "STORY-007"
+        title: "Content Detail & Approval"
+        points: 8
+        status: "completed"
+        completed_at: "2026-03-10"
     total_points: 24
+    completed_points: 24
 
   - number: 3
     status: "planned"
