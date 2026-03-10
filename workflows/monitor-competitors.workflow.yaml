@@ -1,0 +1,103 @@
+workflow:
+  metadata:
+    id: workflows/monitor-competitors
+    name: "Monitorar Concorrentes"
+    trigger: "/monitor-competitors"
+    description: "Scraping diário de concorrentes e análise de tendências"
+    icon: "🔍"
+    version: "1.0.0"
+    author: "Igor Rocha"
+    created: "2026-03-10"
+
+  agents_involved:
+    orchestrator: "content-director"
+    workers:
+      - "content-searcher"
+      - "content-curator"
+
+  cron:
+    schedule: "0 6 * * *"
+    description: "Diário às 6h da manhã"
+    agent: "content-searcher"
+
+  steps:
+    - step: 1
+      agent: "content-searcher"
+      action: "Scraping dos 8 concorrentes"
+      description: |
+        Para cada concorrente em ct_competitors (is_active=true):
+        1. Chamar RapidAPI para posts recentes (últimas 24h)
+        2. Coletar: caption, media_urls, engagement (likes, comments, shares)
+        3. Salvar em ct_competitor_posts
+        4. Atualizar last_scraped_at
+      output: "Posts coletados e salvos no banco"
+
+    - step: 2
+      agent: "content-searcher"
+      action: "Identificar posts virais"
+      description: |
+        Calcular engagement médio por concorrente.
+        Marcar posts com engagement > 3x média como is_viral=true.
+        Gerar análise do que fez viralizar.
+      output: "Posts virais identificados com análise"
+
+    - step: 3
+      agent: "content-searcher"
+      action: "Buscar tendências gerais"
+      description: |
+        Buscar no YouTube: "AI automation", "IA na prática"
+        Verificar Reddit: r/artificialintelligence, r/automation
+        Verificar GitHub trending
+        Compilar top 5 tendências.
+      output: "Lista de tendências do dia"
+
+    - step: 4
+      agent: "content-curator"
+      action: "Sugerir adaptações"
+      description: |
+        Analisar posts virais e tendências.
+        Criar sugestões de conteúdo inspirado (não copiado).
+        Definir formato ideal para cada sugestão.
+      output: "Lista de sugestões de conteúdo"
+
+    - step: 5
+      agent: "content-director"
+      action: "Revisar insights"
+      description: |
+        Compilar relatório diário de inteligência.
+        Destacar oportunidades mais relevantes.
+        Decidir quais sugestões incorporar no plano.
+      output: "Relatório diário aprovado"
+
+  competitors:
+    - handle: "@adamstewartmarketing"
+      platform: "instagram"
+      niche: "AI marketing"
+    - handle: "@divyannshisharma"
+      platform: "instagram"
+      niche: "AI automation"
+    - handle: "@oalanicolas"
+      platform: "instagram"
+      niche: "AI business BR"
+    - handle: "@charlieautomates"
+      platform: "instagram"
+      niche: "AI automation"
+    - handle: "@noevarner.ai"
+      platform: "instagram"
+      niche: "AI tools"
+    - handle: "@liamjohnston.ai"
+      platform: "instagram"
+      niche: "AI agency"
+    - handle: "@odanilogato"
+      platform: "instagram"
+      niche: "AI BR"
+    - handle: "@thaismartan"
+      platform: "instagram"
+      niche: "AI BR"
+
+  success_criteria:
+    - "Todos os 8 concorrentes scraped"
+    - "Posts virais identificados e analisados"
+    - "Tendências do dia compiladas"
+    - "Sugestões de conteúdo geradas"
+    - "Relatório disponível para content-director"

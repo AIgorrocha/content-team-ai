@@ -1,0 +1,76 @@
+workflow:
+  metadata:
+    id: workflows/create-post
+    name: "Criar Post Completo"
+    trigger: "/create-post"
+    description: "Criar post completo com texto e design brief"
+    icon: "✏️"
+    version: "1.0.0"
+    author: "Igor Rocha"
+    created: "2026-03-10"
+
+  agents_involved:
+    orchestrator: "content-director"
+    workers:
+      - "copywriter"
+      - "design-director"
+      - "channel-controller"
+
+  input:
+    required:
+      - "tema: Assunto do post"
+      - "plataforma: Instagram, YouTube, LinkedIn, X, ou Email"
+    optional:
+      - "formato: post, carousel, video, story"
+      - "referencia: URL ou content_id de inspiração"
+
+  steps:
+    - step: 1
+      agent: "content-director"
+      action: "Criar briefing"
+      description: |
+        Definir objetivo do post, público-alvo e mensagem principal.
+        Consultar design system para brand voice.
+      output: "Briefing completo com objetivo e diretrizes"
+
+    - step: 2
+      agent: "copywriter"
+      action: "Escrever copy"
+      description: |
+        Com base no briefing, criar 3 opções de copy.
+        Adaptar tom para a plataforma alvo.
+        Incluir CTA e hashtags sugeridas.
+      output: "3 opções de copy com hashtags"
+
+    - step: 3
+      agent: "design-director"
+      action: "Criar design brief"
+      description: |
+        Definir diretrizes visuais para o post.
+        Incluir cores, layout, referências visuais.
+        Fornecer tokens de design específicos.
+      output: "Design brief com especificações visuais"
+
+    - step: 4
+      agent: "channel-controller"
+      action: "Otimizar para plataforma"
+      description: |
+        Verificar limites de caracteres, hashtags e formato.
+        Sugerir horário ideal de publicação.
+        Ajustar copy se necessário.
+      output: "Post otimizado para a plataforma"
+
+    - step: 5
+      agent: "content-director"
+      action: "Revisão final e aprovação"
+      description: |
+        Apresentar post completo ao Igor.
+        Copy escolhida + design brief + otimizações.
+        Aguardar aprovação ou feedback.
+      output: "Post aprovado em ct_content_items"
+
+  success_criteria:
+    - "Copy aprovada pelo Igor"
+    - "Design brief completo"
+    - "Otimizado para plataforma alvo"
+    - "Salvo em ct_content_items com status 'approved'"

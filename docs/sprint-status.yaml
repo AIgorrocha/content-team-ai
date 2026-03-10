@@ -1,0 +1,44 @@
+project: "Content Team AI"
+current_sprint: 1
+sprint_start: "2026-03-10"
+sprint_end: "2026-03-24"
+velocity_target: 24
+
+sprints:
+  - number: 1
+    status: "in-progress"
+    goal: "Foundation & Core Infrastructure"
+    stories:
+      - id: "STORY-001"
+        title: "Project Setup & Authentication"
+        points: 8
+        status: "todo"
+      - id: "STORY-002"
+        title: "Sidebar Layout & Navigation"
+        points: 5
+        status: "todo"
+      - id: "STORY-003"
+        title: "Overview Dashboard"
+        points: 8
+        status: "todo"
+      - id: "STORY-004"
+        title: "Agent Monitoring Page"
+        points: 3
+        status: "todo"
+    total_points: 24
+    completed_points: 0
+
+  - number: 2
+    status: "planned"
+    goal: "Content Management"
+    total_points: 24
+
+  - number: 3
+    status: "planned"
+    goal: "CRM & Email Marketing"
+    total_points: 29
+
+  - number: 4
+    status: "planned"
+    goal: "Intelligence & Settings"
+    total_points: 13

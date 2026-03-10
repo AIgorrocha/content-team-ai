@@ -1,0 +1,92 @@
+workflow:
+  metadata:
+    id: workflows/create-video
+    name: "Gerar Vídeo com HeyGen"
+    trigger: "/create-video"
+    description: "Gerar vídeo com avatar digital via HeyGen API"
+    icon: "🎬"
+    version: "1.0.0"
+    author: "Igor Rocha"
+    created: "2026-03-10"
+
+  agents_involved:
+    orchestrator: "content-director"
+    workers:
+      - "copywriter"
+      - "clone-agent"
+      - "channel-controller"
+
+  input:
+    required:
+      - "tema: Assunto do vídeo"
+      - "duracao: 30s, 60s, ou 3min"
+    optional:
+      - "avatar: ID do avatar HeyGen"
+      - "plataforma: Instagram Reels, YouTube Shorts, LinkedIn"
+
+  steps:
+    - step: 1
+      agent: "content-director"
+      action: "Criar briefing do vídeo"
+      description: |
+        Definir tema, duração, plataforma e tom.
+        Especificar objetivo e CTA do vídeo.
+      output: "Briefing completo"
+
+    - step: 2
+      agent: "copywriter"
+      action: "Escrever script"
+      description: |
+        Criar script com estrutura: hook (3s) → conteúdo → CTA.
+        Duração alvo conforme especificado.
+        Entregar 2 versões (formal e casual).
+        Incluir notas de entonação e pausas.
+      output: "2 versões de script"
+
+    - step: 3
+      agent: "content-director"
+      action: "Aprovar script"
+      description: |
+        Apresentar scripts ao Igor.
+        Informar custo estimado da geração HeyGen.
+        Aguardar aprovação explícita.
+      output: "Script aprovado + autorização de custo"
+
+    - step: 4
+      agent: "clone-agent"
+      action: "Gerar vídeo via HeyGen"
+      description: |
+        Selecionar avatar e voz clonada.
+        Chamar HeyGen API v2 /video/generate.
+        Monitorar status até conclusão.
+        Estimativa: 2-5 minutos para gerar.
+      output: "Vídeo gerado (URL do HeyGen)"
+
+    - step: 5
+      agent: "channel-controller"
+      action: "Preparar para plataforma"
+      description: |
+        Verificar formato e duração para plataforma alvo.
+        Gerar título, descrição e tags otimizados.
+      output: "Vídeo otimizado para publicação"
+
+    - step: 6
+      agent: "content-director"
+      action: "Aprovação final"
+      description: |
+        Apresentar vídeo + metadados ao Igor.
+        Aguardar aprovação final.
+        Salvar em ct_content_items.
+      output: "Vídeo aprovado e salvo"
+
+  cost_alert: |
+    IMPORTANTE: Vídeos HeyGen são pay-as-you-go.
+    Sempre informar custo estimado antes de gerar.
+    Nunca gerar sem aprovação explícita do Igor.
+
+  success_criteria:
+    - "Script aprovado pelo Igor"
+    - "Custo autorizado antes da geração"
+    - "Vídeo gerado com qualidade aceitável"
+    - "Lip-sync natural"
+    - "Otimizado para plataforma alvo"

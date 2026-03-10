@@ -1,0 +1,88 @@
+workflow:
+  metadata:
+    id: workflows/send-campaign
+    name: "Enviar Campanha de Email"
+    trigger: "/send-campaign"
+    description: "Criar e enviar campanha de email marketing via Mailjet"
+    icon: "📧"
+    version: "1.0.0"
+    author: "Igor Rocha"
+    created: "2026-03-10"
+
+  agents_involved:
+    orchestrator: "content-director"
+    workers:
+      - "copywriter"
+      - "audience-director"
+
+  input:
+    required:
+      - "objetivo: Objetivo da campanha (nurture, venda, newsletter, etc)"
+    optional:
+      - "segmento: Tags dos destinatários"
+      - "urgencia: normal, urgente"
+
+  steps:
+    - step: 1
+      agent: "content-director"
+      action: "Definir briefing da campanha"
+      description: |
+        Definir objetivo, público-alvo (segmento), tom e CTA principal.
+        Verificar quota disponível no Mailjet (6k/mês).
+      output: "Briefing da campanha"
+
+    - step: 2
+      agent: "audience-director"
+      action: "Selecionar audiência"
+      description: |
+        Consultar ct_subscribers por tags e status.
+        Calcular tamanho do segmento.
+        Verificar se quota Mailjet comporta o envio.
+      output: "Segmento selecionado com contagem"
+
+    - step: 3
+      agent: "copywriter"
+      action: "Escrever email"
+      description: |
+        Criar 3 opções de subject line.
+        Escrever body usando framework PAS ou AIDA.
+        Incluir CTA claro e preheader.
+        Versão HTML e texto puro.
+      output: "3 subject lines + body (HTML e texto)"
+
+    - step: 4
+      agent: "content-director"
+      action: "Aprovar campanha"
+      description: |
+        Apresentar ao Igor: subject, preview, audiência, custo.
+        Aguardar aprovação antes de enviar.
+      output: "Campanha aprovada"
+
+    - step: 5
+      agent: "audience-director"
+      action: "Enviar via Mailjet"
+      description: |
+        Configurar campanha no Mailjet API.
+        Enviar para segmento aprovado.
+        Registrar em ct_email_campaigns.
+      output: "Campanha enviada"
+
+    - step: 6
+      agent: "audience-director"
+      action: "Monitorar resultados"
+      description: |
+        Após 24h, consultar stats do Mailjet.
+        Registrar open rate, click rate, bounces.
+        Reportar ao content-director.
+      output: "Relatório de métricas"
+
+  limits:
+    mailjet_free: "6000 emails/mês"
+    mailjet_rate: "200 emails/hora"
+
+  success_criteria:
+    - "Subject line aprovada"
+    - "Copy aprovada pelo Igor"
+    - "Quota Mailjet verificada"
+    - "Email enviado com sucesso"
+    - "Métricas monitoradas após 24h"

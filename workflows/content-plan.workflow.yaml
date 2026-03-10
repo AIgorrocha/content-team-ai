@@ -1,0 +1,76 @@
+workflow:
+  metadata:
+    id: workflows/content-plan
+    name: "Planejamento Semanal de Conteúdo"
+    trigger: "/content-plan"
+    description: "Criar plano semanal de conteúdo para todas as plataformas"
+    icon: "📋"
+    version: "1.0.0"
+    author: "Igor Rocha"
+    created: "2026-03-10"
+
+  agents_involved:
+    orchestrator: "content-director"
+    workers:
+      - "content-searcher"
+      - "copywriter"
+      - "channel-controller"
+      - "editor-chief"
+
+  steps:
+    - step: 1
+      agent: "content-director"
+      action: "Iniciar planejamento semanal"
+      description: |
+        Verificar calendário atual, identificar gaps e definir temas da semana.
+        Consultar ct_content_items para ver o que já está agendado.
+      output: "Lista de temas e gaps identificados"
+
+    - step: 2
+      agent: "content-searcher"
+      action: "Pesquisar tendências e concorrentes"
+      description: |
+        Buscar posts virais dos 8 concorrentes na última semana.
+        Identificar tendências no nicho de IA/automação.
+        Retornar top 5 temas trending.
+      output: "Relatório de tendências e inspirações"
+
+    - step: 3
+      agent: "content-director"
+      action: "Definir plano da semana"
+      description: |
+        Combinar gaps do calendário com tendências encontradas.
+        Definir 1 conteúdo por dia x 5 plataformas = ~7-14 peças.
+        Atribuir formatos por plataforma.
+      output: "Plano semanal com temas, formatos e plataformas"
+
+    - step: 4
+      agent: "channel-controller"
+      action: "Otimizar por plataforma"
+      description: |
+        Para cada conteúdo do plano, definir formato ideal, hashtags
+        e horário de publicação otimizado.
+      output: "Plano otimizado com detalhes por plataforma"
+
+    - step: 5
+      agent: "editor-chief"
+      action: "Agendar no calendário"
+      description: |
+        Criar ct_content_items para cada peça do plano.
+        Definir scheduled_at com horários otimizados.
+        Atribuir agentes responsáveis pela criação.
+      output: "Conteúdos agendados no banco de dados"
+
+    - step: 6
+      agent: "content-director"
+      action: "Submeter para aprovação"
+      description: |
+        Apresentar plano completo ao Igor para aprovação.
+        Listar todos os conteúdos com data, plataforma, formato e tema.
+      output: "Plano aprovado ou ajustado"
+
+  success_criteria:
+    - "Mínimo 7 conteúdos planejados para a semana"
+    - "Todas as 5 plataformas cobertas"
+    - "Horários de publicação otimizados"
+    - "Plano aprovado pelo Igor"
