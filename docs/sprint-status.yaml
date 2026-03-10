@@ -12,21 +12,25 @@ sprints:
       - id: "STORY-001"
         title: "Project Setup & Authentication"
         points: 8
-        status: "todo"
+        status: "completed"
+        completed_at: "2026-03-10"
       - id: "STORY-002"
         title: "Sidebar Layout & Navigation"
         points: 5
-        status: "todo"
+        status: "completed"
+        completed_at: "2026-03-10"
       - id: "STORY-003"
         title: "Overview Dashboard"
         points: 8
-        status: "todo"
+        status: "completed"
+        completed_at: "2026-03-10"
       - id: "STORY-004"
         title: "Agent Monitoring Page"
         points: 3
-        status: "todo"
+        status: "completed"
+        completed_at: "2026-03-10"
     total_points: 24
-    completed_points: 0
+    completed_points: 24
 
   - number: 2
     status: "planned"
