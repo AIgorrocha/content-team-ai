@@ -1,53 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
-import {
-  findUserByEmail,
-  verifyPassword,
-  signToken,
-  getUserTenant,
-  COOKIE_NAME,
-} from "@/lib/auth"
+
+const COOKIE_NAME = "ct-auth-token"
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const body = await request.json()
+    const username = body.username ?? body.email ?? ""
+    const password = body.password ?? ""
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email e senha obrigatórios" },
-        { status: 400 }
-      )
-    }
+    const validUsername = process.env.ADMIN_USERNAME || "admin"
+    const validPassword = process.env.ADMIN_PASSWORD || "sistemasia2026"
 
-    const user = await findUserByEmail(email)
-    if (!user) {
+    if (username !== validUsername || password !== validPassword) {
       return NextResponse.json(
-        { error: "Email ou senha inválidos" },
+        { error: "Usuário ou senha inválidos" },
         { status: 401 }
       )
     }
 
-    const valid = await verifyPassword(password, user.password_hash)
-    if (!valid) {
-      return NextResponse.json(
-        { error: "Email ou senha inválidos" },
-        { status: 401 }
-      )
-    }
-
-    const membership = await getUserTenant(user.id)
-
-    const token = signToken({
-      userId: user.id,
-      tenantId: membership?.tenant.id ?? "",
-      role: membership?.role ?? "",
-    })
-
-    const response = NextResponse.json({
-      success: true,
-      hasTenant: !!membership,
-    })
-
-    response.cookies.set(COOKIE_NAME, token, {
+    const response = NextResponse.json({ success: true, hasTenant: true })
+    response.cookies.set(COOKIE_NAME, "authenticated", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -57,10 +29,7 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch {
-    return NextResponse.json(
-      { error: "Erro interno" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 })
   }
 }
 
