@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "node scripts/disable-swc.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.0",
@@ -33,7 +34,9 @@
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "yaml": "^2.8.2",
-    "zod": "^3.23.0"
+    "zod": "^3.23.0",
+    "@babel/runtime": "^7.24.0",
+    "@babel/plugin-transform-runtime": "^7.24.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
