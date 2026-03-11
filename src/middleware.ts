@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { verifyToken } from "@/lib/auth"
+import { verifyToken } from "@/lib/jwt"
+
+export const runtime = "nodejs"
 
 const PUBLIC_PATHS = ["/login", "/signup", "/onboarding", "/api/auth", "/api/health", "/api/webhook", "/api/billing/plans"]
 

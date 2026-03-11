@@ -1,18 +1,14 @@
 import { cookies } from "next/headers"
-import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 import { query, queryOne } from "@/lib/db"
 import type { User, Tenant, TenantMember } from "@/lib/types"
+import { signToken, verifyToken } from "@/lib/jwt"
+import type { SessionPayload } from "@/lib/jwt"
 
 const COOKIE_NAME = "ct-session"
-const JWT_SECRET = process.env.JWT_SECRET || "change-me-in-production"
-const JWT_EXPIRES_IN = "30d"
 
-export interface SessionPayload {
-  userId: string
-  tenantId: string
-  role: string
-}
+export type { SessionPayload }
+export { signToken, verifyToken }
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
@@ -20,18 +16,6 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash)
-}
-
-export function signToken(payload: SessionPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
-}
-
-export function verifyToken(token: string): SessionPayload | null {
-  try {
-    return jwt.verify(token, JWT_SECRET) as SessionPayload
-  } catch {
-    return null
-  }
 }
 
 export function getSession(): SessionPayload | null {
