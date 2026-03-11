@@ -1,7 +1,8 @@
 import type {
   DashboardStats, Agent, Task, ContentItem, PaginatedResponse,
   Deal, Contact, DealActivity, Subscriber, EmailCampaign,
-  Competitor, CompetitorPost, PipelineStage
+  Competitor, CompetitorPost, PipelineStage,
+  Influencer, Collaboration, DesignSystem
 } from "@/lib/types"
 import type { AgentWithTaskCount, AgentDetail } from "@/lib/queries/agents"
 
@@ -69,5 +70,22 @@ export const api = {
       const qs = params ? `?${new URLSearchParams(params)}` : ""
       return apiCall<{ competitor: Competitor, posts: CompetitorPost[], total: number }>(`/competitors/${id}${qs}`)
     },
+  },
+  influencers: {
+    list: (params?: Record<string, string>) => {
+      const qs = params ? `?${new URLSearchParams(params)}` : ""
+      return apiCall<PaginatedResponse<Influencer & { collaboration_count: number }>>(`/influencers${qs}`)
+    },
+    get: (id: string) => apiCall<{ influencer: Influencer, collaborations: Collaboration[] }>(`/influencers/${id}`),
+  },
+  designSystem: {
+    get: () => apiCall<DesignSystem>("/design-system"),
+    update: (data: Partial<DesignSystem>) =>
+      apiCall<DesignSystem>("/design-system", { method: "PATCH", body: JSON.stringify(data) }),
+  },
+  settings: {
+    get: () => apiCall<Record<string, unknown>>("/settings"),
+    update: (data: Record<string, unknown>) =>
+      apiCall<Record<string, unknown>>("/settings", { method: "PATCH", body: JSON.stringify(data) }),
   },
 }

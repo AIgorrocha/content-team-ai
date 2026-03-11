@@ -1,7 +1,7 @@
 project: "Content Team AI"
-current_sprint: 3
-sprint_start: "2026-04-07"
-sprint_end: "2026-04-21"
+current_sprint: 4
+sprint_start: "2026-04-21"
+sprint_end: "2026-05-05"
 velocity_target: 24
 
 sprints:
@@ -82,6 +82,23 @@ sprints:
     completed_points: 29
 
   - number: 4
-    status: "planned"
+    status: "completed"
     goal: "Intelligence & Settings"
+    stories:
+      - id: "STORY-012"
+        title: "Influencer Management"
+        points: 3
+        status: "completed"
+        completed_at: "2026-03-10"
+      - id: "STORY-013"
+        title: "Design System Editor"
+        points: 5
+        status: "completed"
+        completed_at: "2026-03-10"
+      - id: "STORY-014"
+        title: "Settings & Integrations"
+        points: 5
+        status: "completed"
+        completed_at: "2026-03-10"
     total_points: 13
+    completed_points: 13
