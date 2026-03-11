@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 
-export type SettingsTab = "general" | "integrations" | "api-keys" | "notifications"
+export type SettingsTab = "general" | "integrations" | "api-keys" | "notifications" | "billing"
 
 interface SettingsTabsProps {
   activeTab: SettingsTab
@@ -14,6 +14,7 @@ const tabs: { id: SettingsTab; label: string }[] = [
   { id: "integrations", label: "Integrações" },
   { id: "api-keys", label: "Chaves de API" },
   { id: "notifications", label: "Notificações" },
+  { id: "billing", label: "Plano & Billing" },
 ]
 
 export function SettingsTabs({ activeTab, onTabChange }: SettingsTabsProps) {

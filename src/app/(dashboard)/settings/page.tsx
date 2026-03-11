@@ -6,6 +6,7 @@ import { GeneralTab } from "@/components/settings/general-tab"
 import { IntegrationsTab } from "@/components/settings/integrations-tab"
 import { ApiKeysTab } from "@/components/settings/api-keys-tab"
 import { NotificationsTab } from "@/components/settings/notifications-tab"
+import { BillingTab } from "@/components/billing/billing-tab"
 import type { Settings } from "@/lib/queries/settings"
 
 export default function SettingsPage() {
@@ -130,6 +131,7 @@ export default function SettingsPage() {
             onChange={(notifications) => handleChange({ notifications })}
           />
         )}
+        {activeTab === "billing" && <BillingTab />}
       </div>
     </div>
   )

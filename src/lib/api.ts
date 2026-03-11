@@ -2,7 +2,8 @@ import type {
   DashboardStats, Agent, Task, ContentItem, PaginatedResponse,
   Deal, Contact, DealActivity, Subscriber, EmailCampaign,
   Competitor, CompetitorPost, PipelineStage,
-  Influencer, Collaboration, DesignSystem
+  Influencer, Collaboration, DesignSystem,
+  Plan, Subscription, Usage, PlanId,
 } from "@/lib/types"
 import type { AgentWithTaskCount, AgentDetail } from "@/lib/queries/agents"
 
@@ -87,5 +88,39 @@ export const api = {
     get: () => apiCall<Record<string, unknown>>("/settings"),
     update: (data: Record<string, unknown>) =>
       apiCall<Record<string, unknown>>("/settings", { method: "PATCH", body: JSON.stringify(data) }),
+  },
+  credentials: {
+    list: () => apiCall<Array<{ service: string; keys: string[] }>>("/credentials"),
+    save: (service: string, key: string, value: string) =>
+      apiCall("/credentials", { method: "POST", body: JSON.stringify({ service, key, value }) }),
+    deleteService: (service: string) =>
+      apiCall(`/credentials/${service}`, { method: "DELETE" }),
+    test: (service: string) =>
+      apiCall<{ ok: boolean; message: string }>("/credentials/test", {
+        method: "POST",
+        body: JSON.stringify({ service }),
+      }),
+  },
+  billing: {
+    plans: () => apiCall<{ data: Plan[] }>("/billing/plans"),
+    subscription: () =>
+      apiCall<{ data: { subscription: Subscription | null; usage: Usage | null; currentPlan: string } }>("/billing/subscription"),
+    subscribe: (planId: PlanId, billingCycle: string = "monthly") =>
+      apiCall<{ data: Subscription }>("/billing/subscription", {
+        method: "POST",
+        body: JSON.stringify({ planId, billingCycle }),
+      }),
+    cancel: () => apiCall<{ data: Subscription }>("/billing/subscription", { method: "DELETE" }),
+    usage: () => apiCall("/billing/usage"),
+  },
+  agentActions: {
+    provision: () => apiCall("/agents/provision", { method: "POST" }),
+    run: (slug: string, prompt: string, context?: Record<string, unknown>) =>
+      apiCall<{ taskId: string; result: string }>(`/agents/${slug}/run`, {
+        method: "POST",
+        body: JSON.stringify({ prompt, context }),
+      }),
+    status: (slug: string) => apiCall(`/agents/${slug}/status`),
+    recentTasks: () => apiCall("/agents/tasks/recent"),
   },
 }

@@ -420,6 +420,69 @@ export interface Collaboration {
   created_at: string
 }
 
+// --- BILLING (central DB) ---
+
+export type PlanId = "free" | "starter" | "pro" | "enterprise"
+
+export type SubscriptionStatus = "active" | "cancelled" | "past_due" | "trialing"
+
+export type BillingCycle = "monthly" | "yearly"
+
+export type BillingProvider = "kiwify" | "stripe" | "manual"
+
+export interface PlanLimits {
+  agents: number              // -1 = unlimited
+  tasks_per_month: number
+  content_per_month: number
+  emails_per_month: number
+  storage_mb: number
+}
+
+export interface Plan {
+  id: PlanId
+  name: string
+  description: string | null
+  price_monthly: number       // centavos R$
+  price_yearly: number        // centavos R$
+  limits: PlanLimits
+  features: string[]
+  is_active: boolean
+  sort_order: number
+  created_at: string
+}
+
+export interface Subscription {
+  id: string
+  tenant_id: string
+  plan_id: PlanId
+  status: SubscriptionStatus
+  billing_cycle: BillingCycle
+  provider: BillingProvider | null
+  provider_subscription_id: string | null
+  provider_customer_id: string | null
+  current_period_start: string | null
+  current_period_end: string | null
+  cancelled_at: string | null
+  trial_ends_at: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface Usage {
+  id: string
+  tenant_id: string
+  period: string              // YYYY-MM
+  agents_used: number
+  tasks_executed: number
+  content_created: number
+  emails_sent: number
+  storage_bytes: number
+  api_calls: number
+  created_at: string
+  updated_at: string
+}
+
 // --- API TYPES ---
 
 export interface ApiResponse<T> {

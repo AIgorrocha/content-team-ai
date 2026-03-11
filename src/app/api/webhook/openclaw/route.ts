@@ -58,6 +58,38 @@ export async function POST(request: NextRequest) {
         break
       }
 
+      case "task_completed": {
+        if (payload.task_id) {
+          await db.query(
+            `UPDATE ct_tasks SET status = 'completed', result = $1, completed_at = NOW(), updated_at = NOW()
+             WHERE id = $2`,
+            [JSON.stringify(payload.result ?? {}), payload.task_id]
+          )
+        }
+        if (payload.agent_slug) {
+          await db.query(
+            `UPDATE ct_agents SET status = 'idle', last_active_at = NOW() WHERE slug = $1`,
+            [payload.agent_slug]
+          )
+        }
+        if (payload.content) {
+          await db.query(
+            `INSERT INTO ct_content_items (title, content_type, status, platform, caption, hashtags, source_agent, metadata)
+             VALUES ($1, $2, 'review', $3, $4, $5, $6, $7)`,
+            [
+              payload.content.title ?? "Conteúdo do agente",
+              payload.content.content_type ?? "post",
+              payload.content.platform ?? null,
+              payload.content.caption ?? null,
+              payload.content.hashtags ?? [],
+              payload.agent_slug ?? null,
+              JSON.stringify(payload.content.metadata ?? {}),
+            ]
+          )
+        }
+        break
+      }
+
       default:
         return NextResponse.json(
           { error: `Unknown event type: ${type}` },

@@ -1,0 +1,1235 @@
+# STORY-001: Project Setup & Authentication
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **access the dashboard securely with a token**,
+so that **only I can see my content team data**.
+
+## Acceptance Criteria
+
+- [ ] Next.js 14 App Router project builds and runs with `npm run dev`
+- [ ] shadcn/ui initialized with dark theme (bg: #0D0D0D, surface: #1A1A1A)
+- [ ] Login page at `/login` accepts AUTH_TOKEN and stores in httpOnly cookie
+- [ ] Protected API middleware validates AUTH_TOKEN on all `/api/*` routes
+- [ ] Unauthenticated requests redirect to `/login`
+- [ ] Environment variables loaded from `.env.local`
+- [ ] Database connection pool established via `pg` library
+- [ ] Health check endpoint at `/api/health` returns database status
+- [ ] All 18 ct_* tables exist (migration `001_content_team.sql` applied)
+- [ ] Seed data loaded (13 agents, 6 pipeline stages, 8 competitors, design system)
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/login/page.tsx` - Login form with token input
+- `src/app/api/auth/route.ts` - POST endpoint to validate token and set cookie
+- `src/middleware.ts` - Route protection middleware
+- `src/lib/auth.ts` - Token validation helper
+- `src/app/api/health/route.ts` - Health check endpoint
+- `src/lib/db.ts` - Already exists, verify connection pooling
+
+### Implementation Guidance
+- Use `cookies()` from `next/headers` for httpOnly cookie management
+- Middleware matcher: `['/((?!_next/static|_next/image|favicon.ico|login).*)']`
+- shadcn/ui init: `npx shadcn-ui@latest init` with dark theme
+- Install core shadcn components: button, input, card, badge, table
+
+### Dependencies
+- None (first story)
+
+### Environment Variables Required
+```
+DATABASE_URL=postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres
+AUTH_TOKEN=your-secret-token-here
+```
+
+## Definition of Done
+
+- [ ] Code complete and builds without errors
+- [ ] Login flow works end-to-end
+- [ ] API routes are protected
+- [ ] Database connection verified
+- [ ] All ct_* tables accessible via queries
+
+# STORY-002: Sidebar Layout & Navigation
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 5
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **see a persistent sidebar with navigation to all sections**,
+so that **I can quickly switch between dashboard areas**.
+
+## Acceptance Criteria
+
+- [ ] Sidebar component renders on all authenticated pages
+- [ ] Navigation items with Lucide icons:
+  - LayoutDashboard → Overview (/)
+  - Calendar → Calendar (/calendar)
+  - FileText → Content (/content)
+  - Bot → Agents (/agents)
+  - Kanban → Pipeline (/pipeline)
+  - Users → Contacts (/contacts)
+  - Mail → Subscribers (/subscribers)
+  - Send → Campaigns (/campaigns)
+  - Eye → Competitors (/competitors)
+  - UserPlus → Influencers (/influencers)
+  - Palette → Design (/design)
+  - Settings → Settings (/settings)
+- [ ] Active page visually highlighted (accent color #4A90D9)
+- [ ] Sidebar collapsible: 256px expanded, 64px collapsed (icons only)
+- [ ] Mobile: hamburger menu toggles sidebar overlay
+- [ ] Dark theme: sidebar bg #1A1A1A, page bg #0D0D0D
+- [ ] Logo/brand at top of sidebar: "Content Team AI"
+- [ ] User info at bottom: "Igor Rocha" with logout button
+
+## Technical Notes
+
+### Files to Create
+- `src/components/layout/sidebar.tsx` - Main sidebar (Client Component)
+- `src/components/layout/header.tsx` - Mobile header with hamburger
+- `src/app/(dashboard)/layout.tsx` - Dashboard layout wrapping sidebar + content
+- Move all page routes inside `(dashboard)` route group
+
+### Implementation Guidance
+- Use `usePathname()` from next/navigation for active detection
+- Store collapsed state in localStorage for persistence
+- Use shadcn/ui Sheet component for mobile sidebar overlay
+- Transition animation on collapse/expand (200ms ease)
+
+### Dependencies
+- STORY-001 (authentication, shadcn/ui setup)
+
+## Definition of Done
+
+- [ ] Sidebar renders correctly on desktop and mobile
+- [ ] All 12 navigation items present and clickable
+- [ ] Active state works correctly
+- [ ] Collapse/expand works with icon-only mode
+- [ ] Mobile hamburger menu works
+# STORY-003: Overview Dashboard
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **see a dashboard overview with agent statuses and key metrics**,
+so that **I can quickly understand the state of my content team**.
+
+## Acceptance Criteria
+
+- [ ] Overview page at `/` shows 4 stat cards:
+  - Total Content (count from ct_content_items)
+  - Scheduled This Week (content with scheduled_at in current week)
+  - Active Agents (agents with status='active')
+  - Pipeline Value (sum of ct_deals.value where status='open')
+- [ ] Agent status grid shows all 13 agents with:
+  - Display name and role
+  - Status badge: idle (gray), active (green), error (red)
+  - Last active time (relative: "2h ago", "just now")
+- [ ] Upcoming content section shows next 5 scheduled items:
+  - Title, platform icon, scheduled date
+  - Click navigates to /content/[id]
+- [ ] Pipeline summary shows deal count and total value per stage
+- [ ] All data fetched via API routes (/api/stats, /api/agents)
+- [ ] Auto-refresh every 30 seconds via polling
+- [ ] Loading skeletons while data loads
+
+## Technical Notes
+
+### Files to Create
+- `src/app/(dashboard)/page.tsx` - Overview page (Server Component shell)
+- `src/components/dashboard/stat-card.tsx` - Reusable stat card
+- `src/components/dashboard/agent-grid.tsx` - Agent status grid (Client Component)
+- `src/components/dashboard/upcoming-content.tsx` - Upcoming content list
+- `src/components/dashboard/pipeline-summary.tsx` - Pipeline summary
+- `src/components/shared/status-badge.tsx` - Reusable status badge
+- `src/components/shared/polling-wrapper.tsx` - 30s polling hook
+- `src/app/api/stats/route.ts` - Dashboard stats endpoint
+- `src/app/api/agents/route.ts` - Agents list endpoint
+- `src/lib/queries/stats.ts` - Stats query functions
+- `src/lib/queries/agents.ts` - Agent query functions
+
+### API: GET /api/stats
+```json
+{
+  "totalContent": 0,
+  "scheduledThisWeek": 0,
+  "activeAgents": 0,
+  "pipelineValue": 0,
+  "pipelineByStage": [
+    { "name": "Lead", "count": 0, "value": 0 }
+  ]
+}
+```
+
+### API: GET /api/agents
+```json
+[
+  {
+    "slug": "content-director",
+    "display_name": "Diretor de Conteúdo",
+    "role": "Orquestrador",
+    "status": "idle",
+    "last_active_at": null,
+    "pending_tasks": 0
+  }
+]
+```
+
+### Dependencies
+- STORY-001 (auth, database)
+- STORY-002 (sidebar layout)
+
+## Definition of Done
+
+- [ ] All 4 stat cards display correct data
+- [ ] Agent grid shows all 13 agents with status
+- [ ] Upcoming content section works (empty state if no content)
+- [ ] Pipeline summary displays correctly
+- [ ] 30-second polling works
+- [ ] Loading states present
+# STORY-003: Overview Dashboard
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **see a dashboard overview with agent statuses and key metrics**,
+so that **I can quickly understand the state of my content team**.
+
+## Acceptance Criteria
+
+- [ ] Overview page at `/` shows 4 stat cards:
+  - Total Content (count from ct_content_items)
+  - Scheduled This Week (content with scheduled_at in current week)
+  - Active Agents (agents with status='active')
+  - Pipeline Value (sum of ct_deals.value where status='open')
+- [ ] Agent status grid shows all 13 agents with:
+  - Display name and role
+  - Status badge: idle (gray), active (green), error (red)
+  - Last active time (relative: "2h ago", "just now")
+- [ ] Upcoming content section shows next 5 scheduled items:
+  - Title, platform icon, scheduled date
+  - Click navigates to /content/[id]
+- [ ] Pipeline summary shows deal count and total value per stage
+- [ ] All data fetched via API routes (/api/stats, /api/agents)
+- [ ] Auto-refresh every 30 seconds via polling
+- [ ] Loading skeletons while data loads
+
+## Technical Notes
+
+### Files to Create
+- `src/app/(dashboard)/page.tsx` - Overview page (Server Component shell)
+- `src/components/dashboard/stat-card.tsx` - Reusable stat card
+- `src/components/dashboard/agent-grid.tsx` - Agent status grid (Client Component)
+- `src/components/dashboard/upcoming-content.tsx` - Upcoming content list
+- `src/components/dashboard/pipeline-summary.tsx` - Pipeline summary
+- `src/components/shared/status-badge.tsx` - Reusable status badge
+- `src/components/shared/polling-wrapper.tsx` - 30s polling hook
+- `src/app/api/stats/route.ts` - Dashboard stats endpoint
+- `src/app/api/agents/route.ts` - Agents list endpoint
+- `src/lib/queries/stats.ts` - Stats query functions
+- `src/lib/queries/agents.ts` - Agent query functions
+
+### API: GET /api/stats
+```json
+{
+  "totalContent": 0,
+  "scheduledThisWeek": 0,
+  "activeAgents": 0,
+  "pipelineValue": 0,
+  "pipelineByStage": [
+    { "name": "Lead", "count": 0, "value": 0 }
+  ]
+}
+```
+
+### API: GET /api/agents
+```json
+[
+  {
+    "slug": "content-director",
+    "display_name": "Diretor de Conteúdo",
+    "role": "Orquestrador",
+    "status": "idle",
+    "last_active_at": null,
+    "pending_tasks": 0
+  }
+]
+```
+
+### Dependencies
+- STORY-001 (auth, database)
+- STORY-002 (sidebar layout)
+
+## Definition of Done
+
+- [ ] All 4 stat cards display correct data
+- [ ] Agent grid shows all 13 agents with status
+- [ ] Upcoming content section works (empty state if no content)
+- [ ] Pipeline summary displays correctly
+- [ ] 30-second polling works
+- [ ] Loading states present
+# STORY-005: Content Calendar
+
+**Epic:** Epic 2 - Content Management
+**Sprint:** 2
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content manager (Igor)**,
+I want to **see all scheduled content on a monthly calendar**,
+so that **I can visualize my content plan and identify gaps**.
+
+## Acceptance Criteria
+
+- [ ] Calendar page at `/calendar` shows monthly grid view
+- [ ] Each day cell shows content items scheduled for that day
+- [ ] Content items display title, platform icon, and status badge
+- [ ] Month navigation (previous/next) works correctly
+- [ ] "Today" button returns to current month
+- [ ] Clicking a content item navigates to content detail page
+- [ ] Empty days are clearly visible for gap identification
+- [ ] API endpoint `GET /api/content?from=X&to=Y` returns content by date range
+- [ ] Calendar refreshes via 30s polling
+- [ ] Responsive: works on desktop and tablet
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/api/content/route.ts` - Content API with date range filter
+- `src/lib/queries/content.ts` - Content query functions
+- `src/components/calendar/content-calendar.tsx` - Calendar grid component
+- `src/components/calendar/calendar-day-cell.tsx` - Day cell with content items
+- `src/app/(dashboard)/calendar/page.tsx` - Replace placeholder
+
+### Dependencies
+- Sprint 1 complete (auth, layout, sidebar)
+# STORY-006: Content List & Filters
+
+**Epic:** Epic 2 - Content Management
+**Sprint:** 2
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content manager (Igor)**,
+I want to **see all content in a filterable list**,
+so that **I can quickly find and manage specific content pieces**.
+
+## Acceptance Criteria
+
+- [ ] Content page at `/content` shows a table of all content items
+- [ ] Table columns: Title, Type, Platform, Status, Scheduled Date, Agent
+- [ ] Search by title (debounced input)
+- [ ] Filter by status (all/idea/draft/review/approved/scheduled/published/rejected)
+- [ ] Filter by platform (all/instagram/youtube/linkedin/x/email/tiktok)
+- [ ] Filter by content type (all/post/carousel/reel/video/story/article/email/thread)
+- [ ] Pagination with page size 20
+- [ ] Sort by date (newest first by default)
+- [ ] Clicking a row navigates to content detail
+- [ ] Shows total count of filtered results
+- [ ] API supports query params: search, status, platform, type, page, limit
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/api/content/route.ts` - Extend with search/filter/pagination
+- `src/lib/queries/content.ts` - Extend with filter queries
+- `src/components/content/content-table.tsx` - Table with filters
+- `src/components/shared/data-table.tsx` - Reusable table component
+- `src/components/ui/select.tsx` - shadcn select component
+- `src/app/(dashboard)/content/page.tsx` - Replace placeholder
+
+### Dependencies
+- STORY-005 (shares API endpoint)
+# STORY-007: Content Detail & Approval
+
+**Epic:** Epic 2 - Content Management
+**Sprint:** 2
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content manager (Igor)**,
+I want to **view content details and approve or reject content**,
+so that **I can control what gets published**.
+
+## Acceptance Criteria
+
+- [ ] Content detail page at `/content/[id]` shows full content info
+- [ ] Displays: title, type, platform, status, caption, hashtags, script, visual notes
+- [ ] Shows media URLs as clickable links
+- [ ] Shows source agent that created the content
+- [ ] Shows scheduled/published dates
+- [ ] Approve button changes approval_status to "approved" and status to "approved"
+- [ ] Reject button shows textarea for rejection notes, sets status to "rejected"
+- [ ] Back button returns to content list
+- [ ] API endpoint `GET /api/content/[id]` returns single content item
+- [ ] API endpoint `PATCH /api/content/[id]` updates content (approve/reject/reschedule)
+- [ ] Success/error feedback after actions
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/api/content/[id]/route.ts` - GET and PATCH for single content
+- `src/components/content/content-detail.tsx` - Detail view component
+- `src/components/content/approval-actions.tsx` - Approve/reject buttons
+- `src/app/(dashboard)/content/[id]/page.tsx` - Detail page
+
+### Dependencies
+- STORY-006 (navigates from content list)
+# STORY-008: CRM Kanban Pipeline
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see deals organized in a Kanban board by pipeline stage
+- As a user, I want to drag deals between stages to update their status
+- As a user, I want to see deal value and contact info on each card
+- As a user, I want to add new deals to the pipeline
+
+## Acceptance Criteria
+
+- [ ] Kanban board with columns for each pipeline stage
+- [ ] Deal cards show title, value, contact name, expected close date
+- [ ] Cards are draggable between columns (HTML5 drag & drop)
+- [ ] Moving a card updates the deal's stage via PATCH API
+- [ ] "Add Deal" button opens a form to create new deals
+- [ ] Column headers show count and total value
+- [ ] Color-coded columns matching stage colors
+- [ ] Loading skeleton while data loads
+
+## API Endpoints
+
+- `GET /api/crm/pipeline` - List stages with deals
+- `PATCH /api/crm/deals/:id` - Update deal stage/status
+- `POST /api/crm/deals` - Create new deal
+
+## Technical Notes
+
+- Tables: ct_pipeline_stages, ct_deals, ct_contacts
+- Drag & drop with native HTML5 API (no external lib)
+- Optimistic UI update on drag
+
+# STORY-009: Contact Management
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 5
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see a list of all contacts with search
+- As a user, I want to filter contacts by tags and source
+- As a user, I want to view contact details with activity history
+
+## Acceptance Criteria
+
+- [ ] Contact table with name, email, phone, company, tags, source
+- [ ] Search by name/email (debounce 300ms)
+- [ ] Filter by source
+- [ ] Click opens contact detail with all fields
+- [ ] Activity history timeline (calls, emails, meetings, notes)
+- [ ] Pagination (20 per page)
+
+## API Endpoints
+
+- `GET /api/crm/contacts` - List with filters and pagination
+- `GET /api/crm/contacts/:id` - Detail with activities
+
+## Technical Notes
+
+- Tables: ct_contacts, ct_deal_activities
+- Reuse pagination and filter patterns from content module
+# STORY-010: Email Subscribers & Campaigns
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see all email subscribers with stats
+- As a user, I want to view and manage email campaigns
+- As a user, I want to see campaign stats (open rate, clicks)
+
+## Acceptance Criteria
+
+- [ ] Subscribers tab: table with email, name, status, tags, subscribed date
+- [ ] Subscriber search by email/name
+- [ ] Filter by status (active, unsubscribed, bounced)
+- [ ] Campaigns tab: list with name, status, subject, sent date, stats
+- [ ] Campaign detail with HTML preview and stats
+- [ ] Stats summary cards (total subscribers, active, campaigns sent)
+- [ ] Pagination on both tabs
+
+## API Endpoints
+
+- `GET /api/email/subscribers` - List with filters
+- `GET /api/email/campaigns` - List campaigns
+- `GET /api/email/campaigns/:id` - Campaign detail
+
+## Technical Notes
+
+- Tables: ct_subscribers, ct_email_campaigns
+- Tab navigation between Subscribers and Campaigns
+# STORY-011: Competitor Monitoring
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see a list of competitors being monitored
+- As a user, I want to view competitor posts and engagement data
+- As a user, I want to see which posts went viral
+
+## Acceptance Criteria
+
+- [ ] Competitor cards showing handle, platform, niche, last scraped
+- [ ] Click opens competitor detail with their posts
+- [ ] Posts table: caption preview, type, engagement, posted date, viral flag
+- [ ] Viral posts highlighted with special badge
+- [ ] Filter posts by type and viral status
+- [ ] Post detail shows full caption and analysis
+- [ ] "Add Competitor" placeholder button
+
+## API Endpoints
+
+- `GET /api/competitors` - List competitors
+- `GET /api/competitors/:id` - Competitor with posts
+
+## Technical Notes
+
+- Tables: ct_competitors, ct_competitor_posts
+- Viral posts have `is_viral = true`
+# STORY-012: Influencer Management
+
+**Epic:** Epic 4 - Intelligence & Settings
+**Sprint:** 4
+**Priority:** Must Have
+**Story Points:** 3
+**Status:** Todo
+
+---
+
+## User Stories
+
+1. As a user, I want to see a list of influencers with their status, niche, and follower count
+2. As a user, I want to view influencer details with their collaborations history
+3. As a user, I want to filter influencers by status (prospect, contacted, active, inactive)
+
+## Acceptance Criteria
+
+- [ ] Grid of influencer cards with avatar placeholder, name, niche, followers, status badge
+- [ ] Filter by status (all, prospect, contacted, active, inactive)
+- [ ] Search by name
+- [ ] Click card opens detail page with collaborations list
+- [ ] Collaboration items show type, status, date, and linked content
+- [ ] API: GET /api/influencers (list with filters), GET /api/influencers/[id] (detail + collaborations)
+
+## Technical Notes
+
+- Types: Influencer, Collaboration (already in types.ts)
+- Query: src/lib/queries/influencers.ts
+- Components: influencer-card.tsx, influencer-detail.tsx
+- Pages: /influencers, /influencers/[id]
+
+# STORY-001: Project Setup & Authentication
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **access the dashboard securely with a token**,
+so that **only I can see my content team data**.
+
+## Acceptance Criteria
+
+- [ ] Next.js 14 App Router project builds and runs with `npm run dev`
+- [ ] shadcn/ui initialized with dark theme (bg: #0D0D0D, surface: #1A1A1A)
+- [ ] Login page at `/login` accepts AUTH_TOKEN and stores in httpOnly cookie
+- [ ] Protected API middleware validates AUTH_TOKEN on all `/api/*` routes
+- [ ] Unauthenticated requests redirect to `/login`
+- [ ] Environment variables loaded from `.env.local`
+- [ ] Database connection pool established via `pg` library
+- [ ] Health check endpoint at `/api/health` returns database status
+- [ ] All 18 ct_* tables exist (migration `001_content_team.sql` applied)
+- [ ] Seed data loaded (13 agents, 6 pipeline stages, 8 competitors, design system)
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/login/page.tsx` - Login form with token input
+- `src/app/api/auth/route.ts` - POST endpoint to validate token and set cookie
+- `src/middleware.ts` - Route protection middleware
+- `src/lib/auth.ts` - Token validation helper
+- `src/app/api/health/route.ts` - Health check endpoint
+- `src/lib/db.ts` - Already exists, verify connection pooling
+
+### Implementation Guidance
+- Use `cookies()` from `next/headers` for httpOnly cookie management
+- Middleware matcher: `['/((?!_next/static|_next/image|favicon.ico|login).*)']`
+- shadcn/ui init: `npx shadcn-ui@latest init` with dark theme
+- Install core shadcn components: button, input, card, badge, table
+
+### Dependencies
+- None (first story)
+
+### Environment Variables Required
+```
+DATABASE_URL=postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres
+AUTH_TOKEN=your-secret-token-here
+```
+
+## Definition of Done
+
+- [ ] Code complete and builds without errors
+- [ ] Login flow works end-to-end
+- [ ] API routes are protected
+- [ ] Database connection verified
+- [ ] All ct_* tables accessible via queries
+
+# STORY-002: Sidebar Layout & Navigation
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 5
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **see a persistent sidebar with navigation to all sections**,
+so that **I can quickly switch between dashboard areas**.
+
+## Acceptance Criteria
+
+- [ ] Sidebar component renders on all authenticated pages
+- [ ] Navigation items with Lucide icons:
+  - LayoutDashboard → Overview (/)
+  - Calendar → Calendar (/calendar)
+  - FileText → Content (/content)
+  - Bot → Agents (/agents)
+  - Kanban → Pipeline (/pipeline)
+  - Users → Contacts (/contacts)
+  - Mail → Subscribers (/subscribers)
+  - Send → Campaigns (/campaigns)
+  - Eye → Competitors (/competitors)
+  - UserPlus → Influencers (/influencers)
+  - Palette → Design (/design)
+  - Settings → Settings (/settings)
+- [ ] Active page visually highlighted (accent color #4A90D9)
+- [ ] Sidebar collapsible: 256px expanded, 64px collapsed (icons only)
+- [ ] Mobile: hamburger menu toggles sidebar overlay
+- [ ] Dark theme: sidebar bg #1A1A1A, page bg #0D0D0D
+- [ ] Logo/brand at top of sidebar: "Content Team AI"
+- [ ] User info at bottom: "Igor Rocha" with logout button
+
+## Technical Notes
+
+### Files to Create
+- `src/components/layout/sidebar.tsx` - Main sidebar (Client Component)
+- `src/components/layout/header.tsx` - Mobile header with hamburger
+- `src/app/(dashboard)/layout.tsx` - Dashboard layout wrapping sidebar + content
+- Move all page routes inside `(dashboard)` route group
+
+### Implementation Guidance
+- Use `usePathname()` from next/navigation for active detection
+- Store collapsed state in localStorage for persistence
+- Use shadcn/ui Sheet component for mobile sidebar overlay
+- Transition animation on collapse/expand (200ms ease)
+
+### Dependencies
+- STORY-001 (authentication, shadcn/ui setup)
+
+## Definition of Done
+
+- [ ] Sidebar renders correctly on desktop and mobile
+- [ ] All 12 navigation items present and clickable
+- [ ] Active state works correctly
+- [ ] Collapse/expand works with icon-only mode
+- [ ] Mobile hamburger menu works
+# STORY-003: Overview Dashboard
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **see a dashboard overview with agent statuses and key metrics**,
+so that **I can quickly understand the state of my content team**.
+
+## Acceptance Criteria
+
+- [ ] Overview page at `/` shows 4 stat cards:
+  - Total Content (count from ct_content_items)
+  - Scheduled This Week (content with scheduled_at in current week)
+  - Active Agents (agents with status='active')
+  - Pipeline Value (sum of ct_deals.value where status='open')
+- [ ] Agent status grid shows all 13 agents with:
+  - Display name and role
+  - Status badge: idle (gray), active (green), error (red)
+  - Last active time (relative: "2h ago", "just now")
+- [ ] Upcoming content section shows next 5 scheduled items:
+  - Title, platform icon, scheduled date
+  - Click navigates to /content/[id]
+- [ ] Pipeline summary shows deal count and total value per stage
+- [ ] All data fetched via API routes (/api/stats, /api/agents)
+- [ ] Auto-refresh every 30 seconds via polling
+- [ ] Loading skeletons while data loads
+
+## Technical Notes
+
+### Files to Create
+- `src/app/(dashboard)/page.tsx` - Overview page (Server Component shell)
+- `src/components/dashboard/stat-card.tsx` - Reusable stat card
+- `src/components/dashboard/agent-grid.tsx` - Agent status grid (Client Component)
+- `src/components/dashboard/upcoming-content.tsx` - Upcoming content list
+- `src/components/dashboard/pipeline-summary.tsx` - Pipeline summary
+- `src/components/shared/status-badge.tsx` - Reusable status badge
+- `src/components/shared/polling-wrapper.tsx` - 30s polling hook
+- `src/app/api/stats/route.ts` - Dashboard stats endpoint
+- `src/app/api/agents/route.ts` - Agents list endpoint
+- `src/lib/queries/stats.ts` - Stats query functions
+- `src/lib/queries/agents.ts` - Agent query functions
+
+### API: GET /api/stats
+```json
+{
+  "totalContent": 0,
+  "scheduledThisWeek": 0,
+  "activeAgents": 0,
+  "pipelineValue": 0,
+  "pipelineByStage": [
+    { "name": "Lead", "count": 0, "value": 0 }
+  ]
+}
+```
+
+### API: GET /api/agents
+```json
+[
+  {
+    "slug": "content-director",
+    "display_name": "Diretor de Conteúdo",
+    "role": "Orquestrador",
+    "status": "idle",
+    "last_active_at": null,
+    "pending_tasks": 0
+  }
+]
+```
+
+### Dependencies
+- STORY-001 (auth, database)
+- STORY-002 (sidebar layout)
+
+## Definition of Done
+
+- [ ] All 4 stat cards display correct data
+- [ ] Agent grid shows all 13 agents with status
+- [ ] Upcoming content section works (empty state if no content)
+- [ ] Pipeline summary displays correctly
+- [ ] 30-second polling works
+- [ ] Loading states present
+# STORY-003: Overview Dashboard
+
+**Epic:** Epic 1 - Foundation & Core Infrastructure
+**Sprint:** 1
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content creator (Igor)**,
+I want to **see a dashboard overview with agent statuses and key metrics**,
+so that **I can quickly understand the state of my content team**.
+
+## Acceptance Criteria
+
+- [ ] Overview page at `/` shows 4 stat cards:
+  - Total Content (count from ct_content_items)
+  - Scheduled This Week (content with scheduled_at in current week)
+  - Active Agents (agents with status='active')
+  - Pipeline Value (sum of ct_deals.value where status='open')
+- [ ] Agent status grid shows all 13 agents with:
+  - Display name and role
+  - Status badge: idle (gray), active (green), error (red)
+  - Last active time (relative: "2h ago", "just now")
+- [ ] Upcoming content section shows next 5 scheduled items:
+  - Title, platform icon, scheduled date
+  - Click navigates to /content/[id]
+- [ ] Pipeline summary shows deal count and total value per stage
+- [ ] All data fetched via API routes (/api/stats, /api/agents)
+- [ ] Auto-refresh every 30 seconds via polling
+- [ ] Loading skeletons while data loads
+
+## Technical Notes
+
+### Files to Create
+- `src/app/(dashboard)/page.tsx` - Overview page (Server Component shell)
+- `src/components/dashboard/stat-card.tsx` - Reusable stat card
+- `src/components/dashboard/agent-grid.tsx` - Agent status grid (Client Component)
+- `src/components/dashboard/upcoming-content.tsx` - Upcoming content list
+- `src/components/dashboard/pipeline-summary.tsx` - Pipeline summary
+- `src/components/shared/status-badge.tsx` - Reusable status badge
+- `src/components/shared/polling-wrapper.tsx` - 30s polling hook
+- `src/app/api/stats/route.ts` - Dashboard stats endpoint
+- `src/app/api/agents/route.ts` - Agents list endpoint
+- `src/lib/queries/stats.ts` - Stats query functions
+- `src/lib/queries/agents.ts` - Agent query functions
+
+### API: GET /api/stats
+```json
+{
+  "totalContent": 0,
+  "scheduledThisWeek": 0,
+  "activeAgents": 0,
+  "pipelineValue": 0,
+  "pipelineByStage": [
+    { "name": "Lead", "count": 0, "value": 0 }
+  ]
+}
+```
+
+### API: GET /api/agents
+```json
+[
+  {
+    "slug": "content-director",
+    "display_name": "Diretor de Conteúdo",
+    "role": "Orquestrador",
+    "status": "idle",
+    "last_active_at": null,
+    "pending_tasks": 0
+  }
+]
+```
+
+### Dependencies
+- STORY-001 (auth, database)
+- STORY-002 (sidebar layout)
+
+## Definition of Done
+
+- [ ] All 4 stat cards display correct data
+- [ ] Agent grid shows all 13 agents with status
+- [ ] Upcoming content section works (empty state if no content)
+- [ ] Pipeline summary displays correctly
+- [ ] 30-second polling works
+- [ ] Loading states present
+# STORY-005: Content Calendar
+
+**Epic:** Epic 2 - Content Management
+**Sprint:** 2
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content manager (Igor)**,
+I want to **see all scheduled content on a monthly calendar**,
+so that **I can visualize my content plan and identify gaps**.
+
+## Acceptance Criteria
+
+- [ ] Calendar page at `/calendar` shows monthly grid view
+- [ ] Each day cell shows content items scheduled for that day
+- [ ] Content items display title, platform icon, and status badge
+- [ ] Month navigation (previous/next) works correctly
+- [ ] "Today" button returns to current month
+- [ ] Clicking a content item navigates to content detail page
+- [ ] Empty days are clearly visible for gap identification
+- [ ] API endpoint `GET /api/content?from=X&to=Y` returns content by date range
+- [ ] Calendar refreshes via 30s polling
+- [ ] Responsive: works on desktop and tablet
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/api/content/route.ts` - Content API with date range filter
+- `src/lib/queries/content.ts` - Content query functions
+- `src/components/calendar/content-calendar.tsx` - Calendar grid component
+- `src/components/calendar/calendar-day-cell.tsx` - Day cell with content items
+- `src/app/(dashboard)/calendar/page.tsx` - Replace placeholder
+
+### Dependencies
+- Sprint 1 complete (auth, layout, sidebar)
+# STORY-006: Content List & Filters
+
+**Epic:** Epic 2 - Content Management
+**Sprint:** 2
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content manager (Igor)**,
+I want to **see all content in a filterable list**,
+so that **I can quickly find and manage specific content pieces**.
+
+## Acceptance Criteria
+
+- [ ] Content page at `/content` shows a table of all content items
+- [ ] Table columns: Title, Type, Platform, Status, Scheduled Date, Agent
+- [ ] Search by title (debounced input)
+- [ ] Filter by status (all/idea/draft/review/approved/scheduled/published/rejected)
+- [ ] Filter by platform (all/instagram/youtube/linkedin/x/email/tiktok)
+- [ ] Filter by content type (all/post/carousel/reel/video/story/article/email/thread)
+- [ ] Pagination with page size 20
+- [ ] Sort by date (newest first by default)
+- [ ] Clicking a row navigates to content detail
+- [ ] Shows total count of filtered results
+- [ ] API supports query params: search, status, platform, type, page, limit
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/api/content/route.ts` - Extend with search/filter/pagination
+- `src/lib/queries/content.ts` - Extend with filter queries
+- `src/components/content/content-table.tsx` - Table with filters
+- `src/components/shared/data-table.tsx` - Reusable table component
+- `src/components/ui/select.tsx` - shadcn select component
+- `src/app/(dashboard)/content/page.tsx` - Replace placeholder
+
+### Dependencies
+- STORY-005 (shares API endpoint)
+# STORY-007: Content Detail & Approval
+
+**Epic:** Epic 2 - Content Management
+**Sprint:** 2
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Story
+
+As a **content manager (Igor)**,
+I want to **view content details and approve or reject content**,
+so that **I can control what gets published**.
+
+## Acceptance Criteria
+
+- [ ] Content detail page at `/content/[id]` shows full content info
+- [ ] Displays: title, type, platform, status, caption, hashtags, script, visual notes
+- [ ] Shows media URLs as clickable links
+- [ ] Shows source agent that created the content
+- [ ] Shows scheduled/published dates
+- [ ] Approve button changes approval_status to "approved" and status to "approved"
+- [ ] Reject button shows textarea for rejection notes, sets status to "rejected"
+- [ ] Back button returns to content list
+- [ ] API endpoint `GET /api/content/[id]` returns single content item
+- [ ] API endpoint `PATCH /api/content/[id]` updates content (approve/reject/reschedule)
+- [ ] Success/error feedback after actions
+
+## Technical Notes
+
+### Files to Create/Modify
+- `src/app/api/content/[id]/route.ts` - GET and PATCH for single content
+- `src/components/content/content-detail.tsx` - Detail view component
+- `src/components/content/approval-actions.tsx` - Approve/reject buttons
+- `src/app/(dashboard)/content/[id]/page.tsx` - Detail page
+
+### Dependencies
+- STORY-006 (navigates from content list)
+# STORY-008: CRM Kanban Pipeline
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see deals organized in a Kanban board by pipeline stage
+- As a user, I want to drag deals between stages to update their status
+- As a user, I want to see deal value and contact info on each card
+- As a user, I want to add new deals to the pipeline
+
+## Acceptance Criteria
+
+- [ ] Kanban board with columns for each pipeline stage
+- [ ] Deal cards show title, value, contact name, expected close date
+- [ ] Cards are draggable between columns (HTML5 drag & drop)
+- [ ] Moving a card updates the deal's stage via PATCH API
+- [ ] "Add Deal" button opens a form to create new deals
+- [ ] Column headers show count and total value
+- [ ] Color-coded columns matching stage colors
+- [ ] Loading skeleton while data loads
+
+## API Endpoints
+
+- `GET /api/crm/pipeline` - List stages with deals
+- `PATCH /api/crm/deals/:id` - Update deal stage/status
+- `POST /api/crm/deals` - Create new deal
+
+## Technical Notes
+
+- Tables: ct_pipeline_stages, ct_deals, ct_contacts
+- Drag & drop with native HTML5 API (no external lib)
+- Optimistic UI update on drag
+
+# STORY-009: Contact Management
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 5
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see a list of all contacts with search
+- As a user, I want to filter contacts by tags and source
+- As a user, I want to view contact details with activity history
+
+## Acceptance Criteria
+
+- [ ] Contact table with name, email, phone, company, tags, source
+- [ ] Search by name/email (debounce 300ms)
+- [ ] Filter by source
+- [ ] Click opens contact detail with all fields
+- [ ] Activity history timeline (calls, emails, meetings, notes)
+- [ ] Pagination (20 per page)
+
+## API Endpoints
+
+- `GET /api/crm/contacts` - List with filters and pagination
+- `GET /api/crm/contacts/:id` - Detail with activities
+
+## Technical Notes
+
+- Tables: ct_contacts, ct_deal_activities
+- Reuse pagination and filter patterns from content module
+# STORY-010: Email Subscribers & Campaigns
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see all email subscribers with stats
+- As a user, I want to view and manage email campaigns
+- As a user, I want to see campaign stats (open rate, clicks)
+
+## Acceptance Criteria
+
+- [ ] Subscribers tab: table with email, name, status, tags, subscribed date
+- [ ] Subscriber search by email/name
+- [ ] Filter by status (active, unsubscribed, bounced)
+- [ ] Campaigns tab: list with name, status, subject, sent date, stats
+- [ ] Campaign detail with HTML preview and stats
+- [ ] Stats summary cards (total subscribers, active, campaigns sent)
+- [ ] Pagination on both tabs
+
+## API Endpoints
+
+- `GET /api/email/subscribers` - List with filters
+- `GET /api/email/campaigns` - List campaigns
+- `GET /api/email/campaigns/:id` - Campaign detail
+
+## Technical Notes
+
+- Tables: ct_subscribers, ct_email_campaigns
+- Tab navigation between Subscribers and Campaigns
+# STORY-011: Competitor Monitoring
+
+**Epic:** Epic 3 - CRM & Email Marketing
+**Sprint:** 3
+**Priority:** Must Have
+**Story Points:** 8
+**Status:** Todo
+
+---
+
+## User Stories
+
+- As a user, I want to see a list of competitors being monitored
+- As a user, I want to view competitor posts and engagement data
+- As a user, I want to see which posts went viral
+
+## Acceptance Criteria
+
+- [ ] Competitor cards showing handle, platform, niche, last scraped
+- [ ] Click opens competitor detail with their posts
+- [ ] Posts table: caption preview, type, engagement, posted date, viral flag
+- [ ] Viral posts highlighted with special badge
+- [ ] Filter posts by type and viral status
+- [ ] Post detail shows full caption and analysis
+- [ ] "Add Competitor" placeholder button
+
+## API Endpoints
+
+- `GET /api/competitors` - List competitors
+- `GET /api/competitors/:id` - Competitor with posts
+
+## Technical Notes
+
+- Tables: ct_competitors, ct_competitor_posts
+- Viral posts have `is_viral = true`
+# STORY-012: Influencer Management
+
+**Epic:** Epic 4 - Intelligence & Settings
+**Sprint:** 4
+**Priority:** Must Have
+**Story Points:** 3
+**Status:** Todo
+
+---
+
+## User Stories
+
+1. As a user, I want to see a list of influencers with their status, niche, and follower count
+2. As a user, I want to view influencer details with their collaborations history
+3. As a user, I want to filter influencers by status (prospect, contacted, active, inactive)
+
+## Acceptance Criteria
+
+- [ ] Grid of influencer cards with avatar placeholder, name, niche, followers, status badge
+- [ ] Filter by status (all, prospect, contacted, active, inactive)
+- [ ] Search by name
+- [ ] Click card opens detail page with collaborations list
+- [ ] Collaboration items show type, status, date, and linked content
+- [ ] API: GET /api/influencers (list with filters), GET /api/influencers/[id] (detail + collaborations)
+
+## Technical Notes
+
+- Types: Influencer, Collaboration (already in types.ts)
+- Query: src/lib/queries/influencers.ts
+- Components: influencer-card.tsx, influencer-detail.tsx
+- Pages: /influencers, /influencers/[id]
+
+# STORY-014: Settings & Integrations
+
+**Epic:** Epic 4 - Intelligence & Settings
+**Sprint:** 4
+**Priority:** Must Have
+**Story Points:** 5
+**Status:** Todo
+
+---
+
+## User Stories
+
+1. As a user, I want to see all integration statuses (connected/disconnected)
+2. As a user, I want to manage API keys for external services
+3. As a user, I want to configure general platform settings
+
+## Acceptance Criteria
+
+- [ ] Settings page with tabs: General, Integrations, API Keys, Notifications
+- [ ] General tab: platform name, timezone, language, default content settings
+- [ ] Integrations tab: cards for each integration (Instagram, YouTube, n8n, Supabase, email provider) with status badge
+- [ ] API Keys tab: masked key display with copy/regenerate buttons
+- [ ] Notifications tab: toggle switches for email/push notification preferences
+- [ ] Save settings with PATCH API
+- [ ] API: GET /api/settings, PATCH /api/settings
+
+## Technical Notes
+
+- Settings stored in a ct_settings table or similar key-value store
+- Components: settings-tabs.tsx, integration-card.tsx, api-key-row.tsx
+- Page: /settings
