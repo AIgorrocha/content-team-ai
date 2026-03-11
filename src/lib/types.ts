@@ -35,6 +35,61 @@ export type CollaborationType = "collab_post" | "guest" | "interview" | "cross_p
 
 export type ActivityType = "call" | "email" | "meeting" | "note" | "task" | "dm"
 
+// --- ONBOARDING ---
+
+export type OnboardingStep =
+  | "social_links"
+  | "upload_videos"
+  | "analyzing"
+  | "review"
+  | "questionnaire"
+  | "completed"
+
+export interface BrandProfile {
+  id: string
+  brand_voice: {
+    tone: string
+    formality: number
+    energy: string
+    favorite_words: string[]
+    forbidden_words: string[]
+    catchphrases: string[]
+    emoji_style: string
+    favorite_emojis: string[]
+    explanation_style: string
+    audience_name: string
+  }
+  visual_identity: {
+    primary_colors: string[]
+    font_style: string
+    image_style: string
+    carousel_style: string
+  }
+  content_strategy: {
+    platforms: string[]
+    frequency: Record<string, number>
+    best_times: Record<string, string>
+    content_mix: Record<string, number>
+    themes: string[]
+  }
+  audience: {
+    description: string
+    pain_points: string[]
+    goals: string[]
+  }
+  social_links: Record<string, string>
+  site_url: string | null
+  site_analysis: Record<string, unknown>
+  video_urls: string[]
+  video_transcripts: string[]
+  raw_social_data: Record<string, unknown>
+  questionnaire: Record<string, unknown>
+  onboarding_step: OnboardingStep
+  onboarding_completed: boolean
+  created_at: string
+  updated_at: string
+}
+
 // --- MULTI-TENANT (central DB) ---
 
 export type MemberRole = "owner" | "admin" | "member"

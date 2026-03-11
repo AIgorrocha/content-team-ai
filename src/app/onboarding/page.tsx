@@ -1,22 +1,61 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { StepIndicator } from "@/components/onboarding/step-indicator"
+import { SocialLinksForm } from "@/components/onboarding/social-links-form"
+import { VideoUpload } from "@/components/onboarding/video-upload"
+import { AnalysisProgress } from "@/components/onboarding/analysis-progress"
+import { BrandProfileReview } from "@/components/onboarding/brand-profile-review"
+import { AgentQuestions } from "@/components/onboarding/agent-questions"
+import type { OnboardingStep } from "@/lib/types"
 
-type Step = "workspace" | "apikey" | "done"
+type SetupStep = "workspace" | "apikey"
+type Phase = "setup" | "brand"
 
 export default function OnboardingPage() {
-  const [step, setStep] = useState<Step>("workspace")
+  const [phase, setPhase] = useState<Phase>("setup")
+  const [setupStep, setSetupStep] = useState<SetupStep>("workspace")
+  const [brandStep, setBrandStep] = useState<OnboardingStep>("social_links")
+
   const [workspaceName, setWorkspaceName] = useState("")
   const [databaseUrl, setDatabaseUrl] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [apiKey, setApiKey] = useState("")
   const [copied, setCopied] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
   const router = useRouter()
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/onboarding/status", { credentials: "include" })
+      if (!res.ok) return
+      const data = await res.json()
+
+      if (data.onboarding_completed) {
+        router.push("/")
+        router.refresh()
+        return
+      }
+
+      if (data.step) {
+        setPhase("brand")
+        setBrandStep(data.step as OnboardingStep)
+      }
+    } catch {
+      // workspace not set up yet, stay on setup phase
+    } finally {
+      setInitialLoading(false)
+    }
+  }, [router])
+
+  useEffect(() => {
+    fetchStatus()
+  }, [fetchStatus])
 
   async function handleCreateWorkspace(e: React.FormEvent) {
     e.preventDefault()
@@ -27,6 +66,7 @@ export default function OnboardingPage() {
       const res = await fetch("/api/auth/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           workspace_name: workspaceName,
           database_url: databaseUrl,
@@ -36,10 +76,10 @@ export default function OnboardingPage() {
       const data = await res.json()
 
       if (res.ok) {
-        // Generate API key automatically
         const keyRes = await fetch("/api/auth/api-keys", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ label: "OpenClaw" }),
         })
 
@@ -48,7 +88,7 @@ export default function OnboardingPage() {
           setApiKey(keyData.raw_key)
         }
 
-        setStep("apikey")
+        setSetupStep("apikey")
       } else {
         setError(data.error || "Erro ao criar workspace")
       }
@@ -65,96 +105,154 @@ export default function OnboardingPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  if (step === "apikey") {
+  function handleSetupComplete() {
+    setPhase("brand")
+    setBrandStep("social_links")
+  }
+
+  function advanceBrandStep() {
+    const order: OnboardingStep[] = [
+      "social_links",
+      "upload_videos",
+      "analyzing",
+      "review",
+      "questionnaire",
+      "completed",
+    ]
+    const currentIndex = order.indexOf(brandStep)
+    const nextStep = order[currentIndex + 1]
+
+    if (nextStep === "completed") {
+      router.push("/")
+      router.refresh()
+      return
+    }
+
+    if (nextStep) {
+      setBrandStep(nextStep)
+    }
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <p className="text-text-secondary">Carregando...</p>
+      </div>
+    )
+  }
+
+  // --- SETUP PHASE ---
+  if (phase === "setup") {
+    if (setupStep === "apikey") {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          <Card className="w-full max-w-lg">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Sua API Key</CardTitle>
+              <CardDescription>
+                Copie esta chave e cole no seu OpenClaw. Ela só será mostrada uma vez!
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg font-mono text-sm break-all">
+                {apiKey}
+              </div>
+              <Button onClick={handleCopy} className="w-full" variant="outline">
+                {copied ? "Copiado!" : "Copiar API Key"}
+              </Button>
+
+              <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-sm">
+                <p className="font-medium">Como usar no OpenClaw:</p>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                  <li>Abra as configurações do OpenClaw</li>
+                  <li>Vá em &quot;Integrações&quot; ou &quot;API Keys&quot;</li>
+                  <li>Cole a chave acima no campo &quot;Content Team AI&quot;</li>
+                  <li>Salve e pronto!</li>
+                </ol>
+              </div>
+
+              <Button onClick={handleSetupComplete} className="w-full">
+                Continuar para Configuração da Marca
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )
+    }
+
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Card className="w-full max-w-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Sua API Key</CardTitle>
+            <CardTitle className="text-2xl">Configurar Workspace</CardTitle>
             <CardDescription>
-              Copie esta chave e cole no seu OpenClaw. Ela só será mostrada uma vez!
+              Conecte seu banco de dados Supabase para começar
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg font-mono text-sm break-all">
-              {apiKey}
-            </div>
-            <Button onClick={handleCopy} className="w-full" variant="outline">
-              {copied ? "Copiado!" : "Copiar API Key"}
-            </Button>
+          <CardContent>
+            <form onSubmit={handleCreateWorkspace} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nome do Workspace</label>
+                <Input
+                  type="text"
+                  placeholder="Ex: Minha Empresa"
+                  value={workspaceName}
+                  onChange={(e) => setWorkspaceName(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
 
-            <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-sm">
-              <p className="font-medium">Como usar no OpenClaw:</p>
-              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                <li>Abra as configurações do OpenClaw</li>
-                <li>Vá em &quot;Integrações&quot; ou &quot;API Keys&quot;</li>
-                <li>Cole a chave acima no campo &quot;Content Team AI&quot;</li>
-                <li>Salve e pronto!</li>
-              </ol>
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">URL do Banco de Dados</label>
+                <Input
+                  type="text"
+                  placeholder="postgresql://postgres:senha@host:5432/postgres"
+                  value={databaseUrl}
+                  onChange={(e) => setDatabaseUrl(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Encontre no Supabase: Settings → Database → Connection string (URI)
+                </p>
+              </div>
 
-            <Button
-              onClick={() => {
-                router.push("/")
-                router.refresh()
-              }}
-              className="w-full"
-            >
-              Ir para o Dashboard
-            </Button>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Conectando..." : "Conectar e Criar Workspace"}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
     )
   }
 
+  // --- BRAND PROFILE PHASE ---
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Configurar Workspace</CardTitle>
-          <CardDescription>
-            Conecte seu banco de dados Supabase para começar
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleCreateWorkspace} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Nome do Workspace</label>
-              <Input
-                type="text"
-                placeholder="Ex: Minha Empresa"
-                value={workspaceName}
-                onChange={(e) => setWorkspaceName(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
+    <div className="min-h-screen bg-background py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        <StepIndicator currentStep={brandStep} />
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">URL do Banco de Dados</label>
-              <Input
-                type="text"
-                placeholder="postgresql://postgres:senha@host:5432/postgres"
-                value={databaseUrl}
-                onChange={(e) => setDatabaseUrl(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Encontre no Supabase: Settings → Database → Connection string (URI)
-              </p>
-            </div>
-
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
-            )}
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Conectando..." : "Conectar e Criar Workspace"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <div className="mt-8">
+          {brandStep === "social_links" && (
+            <SocialLinksForm onComplete={advanceBrandStep} />
+          )}
+          {brandStep === "upload_videos" && (
+            <VideoUpload onComplete={advanceBrandStep} />
+          )}
+          {brandStep === "analyzing" && (
+            <AnalysisProgress onComplete={advanceBrandStep} />
+          )}
+          {brandStep === "review" && (
+            <BrandProfileReview onComplete={advanceBrandStep} />
+          )}
+          {brandStep === "questionnaire" && (
+            <AgentQuestions onComplete={advanceBrandStep} />
+          )}
+        </div>
+      </div>
     </div>
   )
 }
