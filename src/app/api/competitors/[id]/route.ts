@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { withTenantDB } from "@/lib/route-helper"
 import { getCompetitorWithPosts } from "@/lib/queries/competitors"
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withTenantDB(request, async (db) => {
     const { id } = await params
     const url = new URL(request.url)
 
@@ -15,13 +16,10 @@ export async function GET(
     const page = parseInt(url.searchParams.get("page") ?? "1")
     const limit = parseInt(url.searchParams.get("limit") ?? "20")
 
-    const result = await getCompetitorWithPosts(id, { post_type, is_viral, page, limit })
+    const result = await getCompetitorWithPosts(db, id, { post_type, is_viral, page, limit })
+    if (!result) throw new Error("Competitor not found")
 
-    if (!result) {
-      return NextResponse.json({ error: "Competitor not found" }, { status: 404 })
-    }
-
-    return NextResponse.json({
+    return {
       data: result.posts,
       competitor: result.competitor,
       meta: {
@@ -30,11 +28,6 @@ export async function GET(
         limit,
         totalPages: Math.ceil(result.total / limit),
       },
-    })
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    )
-  }
+    }
+  })
 }

@@ -1,4 +1,4 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { PipelineStage, Deal } from "@/lib/types"
 
 export interface DealWithContact extends Deal {
@@ -13,12 +13,12 @@ export interface PipelineData {
   stages: StageWithDeals[]
 }
 
-export async function listPipelineWithDeals(): Promise<PipelineData> {
-  const stages = await query<PipelineStage>(
+export async function listPipelineWithDeals(db: TenantDB): Promise<PipelineData> {
+  const stages = await db.query<PipelineStage>(
     "SELECT * FROM ct_pipeline_stages ORDER BY position ASC"
   )
 
-  const deals = await query<DealWithContact & { stage_id: string }>(
+  const deals = await db.query<DealWithContact & { stage_id: string }>(
     `SELECT d.*, c.name as contact_name
      FROM ct_deals d
      LEFT JOIN ct_contacts c ON c.id = d.contact_id
@@ -41,10 +41,11 @@ export async function listPipelineWithDeals(): Promise<PipelineData> {
 }
 
 export async function updateDealStage(
+  db: TenantDB,
   dealId: string,
   stageId: string
 ): Promise<Deal | null> {
-  return queryOne<Deal>(
+  return db.queryOne<Deal>(
     `UPDATE ct_deals
      SET stage_id = $1, updated_at = NOW()
      WHERE id = $2
@@ -60,6 +61,7 @@ interface UpdateDealData {
 }
 
 export async function updateDeal(
+  db: TenantDB,
   dealId: string,
   data: UpdateDealData
 ): Promise<Deal | null> {
@@ -83,12 +85,12 @@ export async function updateDeal(
   }
 
   if (setClauses.length === 0) {
-    return queryOne<Deal>("SELECT * FROM ct_deals WHERE id = $1", [dealId])
+    return db.queryOne<Deal>("SELECT * FROM ct_deals WHERE id = $1", [dealId])
   }
 
   setClauses.push("updated_at = NOW()")
 
-  return queryOne<Deal>(
+  return db.queryOne<Deal>(
     `UPDATE ct_deals SET ${setClauses.join(", ")} WHERE id = $${paramIndex} RETURNING *`,
     [...params, dealId]
   )
@@ -102,8 +104,8 @@ interface CreateDealData {
   expected_close_at?: string
 }
 
-export async function createDeal(data: CreateDealData): Promise<Deal | null> {
-  return queryOne<Deal>(
+export async function createDeal(db: TenantDB, data: CreateDealData): Promise<Deal | null> {
+  return db.queryOne<Deal>(
     `INSERT INTO ct_deals (title, contact_id, stage_id, value, expected_close_at)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,

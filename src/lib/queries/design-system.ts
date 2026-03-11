@@ -1,11 +1,12 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { DesignSystem } from "@/lib/types"
 
-export async function getDesignSystem(): Promise<DesignSystem | null> {
-  return queryOne<DesignSystem>("SELECT * FROM ct_design_system LIMIT 1")
+export async function getDesignSystem(db: TenantDB): Promise<DesignSystem | null> {
+  return db.queryOne<DesignSystem>("SELECT * FROM ct_design_system LIMIT 1")
 }
 
 export async function updateDesignSystem(
+  db: TenantDB,
   data: Partial<DesignSystem>
 ): Promise<DesignSystem | null> {
   const fields: string[] = []
@@ -34,7 +35,7 @@ export async function updateDesignSystem(
   }
 
   if (fields.length === 0) {
-    return getDesignSystem()
+    return getDesignSystem(db)
   }
 
   fields.push("updated_at = NOW()")
@@ -46,5 +47,5 @@ export async function updateDesignSystem(
     RETURNING *
   `
 
-  return queryOne<DesignSystem>(sql, values)
+  return db.queryOne<DesignSystem>(sql, values)
 }

@@ -1,4 +1,4 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { Contact, DealActivity } from "@/lib/types"
 
 export interface ContactFilters {
@@ -18,7 +18,7 @@ export interface ContactWithActivities {
   activities: DealActivity[]
 }
 
-export async function listContacts(filters: ContactFilters = {}): Promise<ContactListResult> {
+export async function listContacts(db: TenantDB, filters: ContactFilters = {}): Promise<ContactListResult> {
   const { page = 1, limit = 20 } = filters
   const offset = (page - 1) * limit
 
@@ -39,14 +39,14 @@ export async function listContacts(filters: ContactFilters = {}): Promise<Contac
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""
 
-  const countRows = await query<{ count: string }>(
+  const countRows = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text as count FROM ct_contacts ${where}`,
     params
   )
   const total = parseInt(countRows[0]?.count ?? "0")
 
   const dataParams = [...params, limit, offset]
-  const data = await query<Contact>(
+  const data = await db.query<Contact>(
     `SELECT * FROM ct_contacts ${where}
      ORDER BY created_at DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
@@ -56,8 +56,8 @@ export async function listContacts(filters: ContactFilters = {}): Promise<Contac
   return { data, total }
 }
 
-export async function getContactById(id: string): Promise<ContactWithActivities | null> {
-  const contact = await queryOne<Contact>(
+export async function getContactById(db: TenantDB, id: string): Promise<ContactWithActivities | null> {
+  const contact = await db.queryOne<Contact>(
     "SELECT * FROM ct_contacts WHERE id = $1",
     [id]
   )
@@ -66,7 +66,7 @@ export async function getContactById(id: string): Promise<ContactWithActivities 
     return null
   }
 
-  const activities = await query<DealActivity>(
+  const activities = await db.query<DealActivity>(
     "SELECT * FROM ct_deal_activities WHERE contact_id = $1 ORDER BY performed_at DESC",
     [id]
   )

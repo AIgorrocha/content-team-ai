@@ -1,4 +1,4 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { Influencer, Collaboration, InfluencerStatus } from "@/lib/types"
 
 export interface InfluencerFilters {
@@ -18,6 +18,7 @@ export interface PaginatedInfluencers {
 }
 
 export async function listInfluencers(
+  db: TenantDB,
   filters: InfluencerFilters = {}
 ): Promise<PaginatedInfluencers> {
   const { page = 1, limit = 20 } = filters
@@ -42,14 +43,14 @@ export async function listInfluencers(
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""
 
-  const countRows = await query<{ count: string }>(
+  const countRows = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text as count FROM ct_influencers i ${where}`,
     params
   )
   const total = parseInt(countRows[0]?.count ?? "0")
 
   const dataParams = [...params, limit, offset]
-  const influencers = await query<InfluencerWithCount>(
+  const influencers = await db.query<InfluencerWithCount>(
     `SELECT i.*, COALESCE(c.cnt, 0)::int as collaboration_count
      FROM ct_influencers i
      LEFT JOIN (
@@ -72,16 +73,17 @@ export interface InfluencerDetail {
 }
 
 export async function getInfluencer(
+  db: TenantDB,
   id: string
 ): Promise<InfluencerDetail | null> {
-  const influencer = await queryOne<Influencer>(
+  const influencer = await db.queryOne<Influencer>(
     "SELECT * FROM ct_influencers WHERE id = $1",
     [id]
   )
 
   if (!influencer) return null
 
-  const collaborations = await query<Collaboration>(
+  const collaborations = await db.query<Collaboration>(
     `SELECT * FROM ct_collaborations
      WHERE influencer_id = $1
      ORDER BY created_at DESC`,

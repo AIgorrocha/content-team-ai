@@ -1,4 +1,4 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { ContentItem, ContentStatus, ContentType, Platform, ApprovalStatus } from "@/lib/types"
 
 export interface ContentFilters {
@@ -17,7 +17,7 @@ export interface ContentListResult {
   total: number
 }
 
-export async function listContent(filters: ContentFilters = {}): Promise<ContentListResult> {
+export async function listContent(db: TenantDB, filters: ContentFilters = {}): Promise<ContentListResult> {
   const { page = 1, limit = 20 } = filters
   const offset = (page - 1) * limit
 
@@ -57,14 +57,14 @@ export async function listContent(filters: ContentFilters = {}): Promise<Content
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""
 
-  const countRows = await query<{ count: string }>(
+  const countRows = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text as count FROM ct_content_items ${where}`,
     params
   )
   const total = parseInt(countRows[0]?.count ?? "0")
 
   const dataParams = [...params, limit, offset]
-  const data = await query<ContentItem>(
+  const data = await db.query<ContentItem>(
     `SELECT * FROM ct_content_items ${where}
      ORDER BY created_at DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
@@ -74,8 +74,8 @@ export async function listContent(filters: ContentFilters = {}): Promise<Content
   return { data, total }
 }
 
-export async function getContentById(id: string): Promise<ContentItem | null> {
-  return queryOne<ContentItem>(
+export async function getContentById(db: TenantDB, id: string): Promise<ContentItem | null> {
+  return db.queryOne<ContentItem>(
     "SELECT * FROM ct_content_items WHERE id = $1",
     [id]
   )
@@ -88,7 +88,7 @@ interface ContentUpdateData {
   scheduled_at?: string | null
 }
 
-export async function updateContent(id: string, data: ContentUpdateData): Promise<ContentItem | null> {
+export async function updateContent(db: TenantDB, id: string, data: ContentUpdateData): Promise<ContentItem | null> {
   const setClauses: string[] = []
   const params: unknown[] = []
   let paramIndex = 1
@@ -114,12 +114,12 @@ export async function updateContent(id: string, data: ContentUpdateData): Promis
   }
 
   if (setClauses.length === 0) {
-    return getContentById(id)
+    return getContentById(db, id)
   }
 
   setClauses.push(`updated_at = NOW()`)
 
-  return queryOne<ContentItem>(
+  return db.queryOne<ContentItem>(
     `UPDATE ct_content_items SET ${setClauses.join(", ")} WHERE id = $${paramIndex} RETURNING *`,
     [...params, id]
   )

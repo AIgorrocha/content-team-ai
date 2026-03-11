@@ -1,24 +1,16 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { withTenantDB } from "@/lib/route-helper"
 import { getContactById } from "@/lib/queries/contacts"
 
 interface RouteParams {
   params: Promise<{ id: string }>
 }
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
-  try {
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  return withTenantDB(request, async (db) => {
     const { id } = await params
-    const result = await getContactById(id)
-
-    if (!result) {
-      return NextResponse.json({ error: "Contact not found" }, { status: 404 })
-    }
-
-    return NextResponse.json(result)
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    )
-  }
+    const result = await getContactById(db, id)
+    if (!result) throw new Error("Contact not found")
+    return result
+  })
 }

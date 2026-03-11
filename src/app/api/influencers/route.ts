@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { withTenantDB } from "@/lib/route-helper"
 import { listInfluencers } from "@/lib/queries/influencers"
 import type { InfluencerStatus } from "@/lib/types"
 
 const validStatuses: InfluencerStatus[] = ["prospect", "contacted", "active", "inactive"]
 
 export async function GET(request: NextRequest) {
-  try {
+  return withTenantDB(request, async (db) => {
     const url = new URL(request.url)
 
     const statusParam = url.searchParams.get("status") ?? undefined
@@ -16,9 +17,9 @@ export async function GET(request: NextRequest) {
     const page = parseInt(url.searchParams.get("page") ?? "1")
     const limit = parseInt(url.searchParams.get("limit") ?? "20")
 
-    const result = await listInfluencers({ status, search, page, limit })
+    const result = await listInfluencers(db, { status, search, page, limit })
 
-    return NextResponse.json({
+    return {
       data: result.influencers,
       meta: {
         total: result.total,
@@ -26,11 +27,6 @@ export async function GET(request: NextRequest) {
         limit,
         totalPages: Math.ceil(result.total / limit),
       },
-    })
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    )
-  }
+    }
+  })
 }

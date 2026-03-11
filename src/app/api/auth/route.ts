@@ -1,40 +1,65 @@
 import { NextRequest, NextResponse } from "next/server"
-
-const COOKIE_NAME = "ct-auth-token"
+import {
+  findUserByEmail,
+  verifyPassword,
+  signToken,
+  getUserTenant,
+  COOKIE_NAME,
+} from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const { token } = await request.json()
-    const authToken = process.env.AUTH_TOKEN
+    const { email, password } = await request.json()
 
-    if (!authToken) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "Server not configured" },
-        { status: 500 }
+        { error: "Email e senha obrigatórios" },
+        { status: 400 }
       )
     }
 
-    if (token !== authToken) {
+    const user = await findUserByEmail(email)
+    if (!user) {
       return NextResponse.json(
-        { error: "Token inválido" },
+        { error: "Email ou senha inválidos" },
         { status: 401 }
       )
     }
 
-    const response = NextResponse.json({ success: true })
+    const valid = await verifyPassword(password, user.password_hash)
+    if (!valid) {
+      return NextResponse.json(
+        { error: "Email ou senha inválidos" },
+        { status: 401 }
+      )
+    }
+
+    const membership = await getUserTenant(user.id)
+
+    const token = signToken({
+      userId: user.id,
+      tenantId: membership?.tenant.id ?? "",
+      role: membership?.role ?? "",
+    })
+
+    const response = NextResponse.json({
+      success: true,
+      hasTenant: !!membership,
+    })
+
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
     })
 
     return response
   } catch {
     return NextResponse.json(
-      { error: "Invalid request" },
-      { status: 400 }
+      { error: "Erro interno" },
+      { status: 500 }
     )
   }
 }

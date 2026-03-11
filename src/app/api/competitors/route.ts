@@ -1,14 +1,7 @@
-import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { withTenantDB } from "@/lib/route-helper"
 import { listCompetitors } from "@/lib/queries/competitors"
 
-export async function GET() {
-  try {
-    const competitors = await listCompetitors()
-    return NextResponse.json(competitors)
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    )
-  }
+export async function GET(request: NextRequest) {
+  return withTenantDB(request, (db) => listCompetitors(db))
 }

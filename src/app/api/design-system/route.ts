@@ -1,29 +1,18 @@
-import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { withTenantDB } from "@/lib/route-helper"
 import { getDesignSystem, updateDesignSystem } from "@/lib/queries/design-system"
 
-export async function GET() {
-  try {
-    const ds = await getDesignSystem()
-    return NextResponse.json({ data: ds })
-  } catch (error) {
-    console.error("GET /api/design-system failed:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch design system" },
-      { status: 500 }
-    )
-  }
+export async function GET(request: NextRequest) {
+  return withTenantDB(request, async (db) => {
+    const ds = await getDesignSystem(db)
+    return { data: ds }
+  })
 }
 
-export async function PATCH(request: Request) {
-  try {
-    const body = await request.json()
-    const updated = await updateDesignSystem(body)
-    return NextResponse.json({ data: updated })
-  } catch (error) {
-    console.error("PATCH /api/design-system failed:", error)
-    return NextResponse.json(
-      { error: "Failed to update design system" },
-      { status: 500 }
-    )
-  }
+export async function PATCH(request: NextRequest) {
+  const body = await request.json()
+  return withTenantDB(request, async (db) => {
+    const updated = await updateDesignSystem(db, body)
+    return { data: updated }
+  })
 }

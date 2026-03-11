@@ -1,12 +1,10 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type {
   Subscriber,
   SubscriberStatus,
   EmailCampaign,
   CampaignStatus,
 } from "@/lib/types"
-
-// --- Subscriber Filters & Results ---
 
 export interface SubscriberFilters {
   search?: string
@@ -27,8 +25,6 @@ export interface SubscriberStats {
   bounced: number
 }
 
-// --- Campaign Filters & Results ---
-
 export interface CampaignFilters {
   status?: CampaignStatus
   page?: number
@@ -40,9 +36,8 @@ export interface CampaignListResult {
   total: number
 }
 
-// --- Subscriber Queries ---
-
 export async function listSubscribers(
+  db: TenantDB,
   filters: SubscriberFilters = {}
 ): Promise<SubscriberListResult> {
   const { page = 1, limit = 20 } = filters
@@ -68,14 +63,14 @@ export async function listSubscribers(
   const where =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""
 
-  const countRows = await query<{ count: string }>(
+  const countRows = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text as count FROM ct_subscribers ${where}`,
     params
   )
   const total = parseInt(countRows[0]?.count ?? "0")
 
   const dataParams = [...params, limit, offset]
-  const data = await query<Subscriber>(
+  const data = await db.query<Subscriber>(
     `SELECT * FROM ct_subscribers ${where}
      ORDER BY subscribed_at DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
@@ -85,8 +80,8 @@ export async function listSubscribers(
   return { data, total }
 }
 
-export async function getSubscriberStats(): Promise<SubscriberStats> {
-  const rows = await query<{ status: string; count: string }>(
+export async function getSubscriberStats(db: TenantDB): Promise<SubscriberStats> {
+  const rows = await db.query<{ status: string; count: string }>(
     `SELECT status, COUNT(*)::text as count FROM ct_subscribers GROUP BY status`
   )
 
@@ -103,9 +98,8 @@ export async function getSubscriberStats(): Promise<SubscriberStats> {
   return stats
 }
 
-// --- Campaign Queries ---
-
 export async function listCampaigns(
+  db: TenantDB,
   filters: CampaignFilters = {}
 ): Promise<CampaignListResult> {
   const { page = 1, limit = 20 } = filters
@@ -123,14 +117,14 @@ export async function listCampaigns(
   const where =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""
 
-  const countRows = await query<{ count: string }>(
+  const countRows = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text as count FROM ct_email_campaigns ${where}`,
     params
   )
   const total = parseInt(countRows[0]?.count ?? "0")
 
   const dataParams = [...params, limit, offset]
-  const data = await query<EmailCampaign>(
+  const data = await db.query<EmailCampaign>(
     `SELECT * FROM ct_email_campaigns ${where}
      ORDER BY created_at DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
@@ -141,9 +135,10 @@ export async function listCampaigns(
 }
 
 export async function getCampaignById(
+  db: TenantDB,
   id: string
 ): Promise<EmailCampaign | null> {
-  return queryOne<EmailCampaign>(
+  return db.queryOne<EmailCampaign>(
     "SELECT * FROM ct_email_campaigns WHERE id = $1",
     [id]
   )

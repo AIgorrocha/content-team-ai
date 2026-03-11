@@ -1,6 +1,6 @@
 // ============================================
 // Content Team AI - TypeScript Interfaces
-// All 18 ct_* tables + enums + API types
+// Multi-tenant hybrid: auth in central DB, content in client DB
 // ============================================
 
 // --- ENUMS ---
@@ -35,7 +35,47 @@ export type CollaborationType = "collab_post" | "guest" | "interview" | "cross_p
 
 export type ActivityType = "call" | "email" | "meeting" | "note" | "task" | "dm"
 
-// --- CORE ---
+// --- MULTI-TENANT (central DB) ---
+
+export type MemberRole = "owner" | "admin" | "member"
+
+export interface User {
+  id: string
+  email: string
+  name: string
+  password_hash: string
+  created_at: string
+}
+
+export interface Tenant {
+  id: string
+  name: string
+  slug: string
+  plan: string
+  database_url: string
+  created_at: string
+}
+
+export interface TenantMember {
+  id: string
+  tenant_id: string
+  user_id: string
+  role: MemberRole
+  created_at: string
+}
+
+export interface ApiKey {
+  id: string
+  tenant_id: string
+  key_hash: string
+  key_prefix: string
+  label: string
+  last_used_at: string | null
+  revoked_at: string | null
+  created_at: string
+}
+
+// --- CORE (client DB) ---
 
 export interface Agent {
   id: string
@@ -75,7 +115,7 @@ export interface AuditLog {
   created_at: string
 }
 
-// --- CONTENT ---
+// --- CONTENT (client DB) ---
 
 export interface ContentItem {
   id: string
@@ -118,7 +158,7 @@ export interface ContentSeriesItem {
   sequence_num: number
 }
 
-// --- CRM ---
+// --- CRM (client DB) ---
 
 export interface PipelineStage {
   id: string
@@ -171,7 +211,7 @@ export interface DealActivity {
   performed_at: string
 }
 
-// --- EMAIL MARKETING ---
+// --- EMAIL MARKETING (client DB) ---
 
 export interface Subscriber {
   id: string
@@ -224,7 +264,7 @@ export interface EmailSequenceStep {
   metadata: Record<string, unknown>
 }
 
-// --- LEAD MAGNETS ---
+// --- LEAD MAGNETS (client DB) ---
 
 export interface LeadMagnet {
   id: string
@@ -237,7 +277,7 @@ export interface LeadMagnet {
   created_at: string
 }
 
-// --- DESIGN SYSTEM ---
+// --- DESIGN SYSTEM (client DB) ---
 
 export interface DesignSystem {
   id: string
@@ -272,7 +312,7 @@ export interface DesignSystem {
   updated_at: string
 }
 
-// --- COMPETITORS ---
+// --- COMPETITORS (client DB) ---
 
 export interface Competitor {
   id: string
@@ -299,7 +339,7 @@ export interface CompetitorPost {
   scraped_at: string
 }
 
-// --- INFLUENCERS ---
+// --- INFLUENCERS (client DB) ---
 
 export interface Influencer {
   id: string

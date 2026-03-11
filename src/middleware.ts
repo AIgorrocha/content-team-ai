@@ -1,27 +1,43 @@
 import { NextRequest, NextResponse } from "next/server"
+import { verifyToken } from "@/lib/auth"
 
-const COOKIE_NAME = "ct-auth-token"
+const PUBLIC_PATHS = ["/login", "/signup", "/onboarding", "/api/auth", "/api/health", "/api/webhook"]
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get(COOKIE_NAME)?.value
-  const authToken = process.env.AUTH_TOKEN
+  const { pathname } = request.nextUrl
+  const isApi = pathname.startsWith("/api/")
 
-  const isLoginPage = request.nextUrl.pathname === "/login"
-  const isApiAuth = request.nextUrl.pathname === "/api/auth"
-  const isApiHealth = request.nextUrl.pathname === "/api/health"
-  const isApi = request.nextUrl.pathname.startsWith("/api/")
-
-  // Allow login page, auth endpoint, and health check
-  if (isLoginPage || isApiAuth || isApiHealth) {
+  // Allow public paths
+  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next()
   }
 
-  // Check auth
-  if (!token || token !== authToken) {
+  // API routes: accept session cookie OR X-API-Key
+  if (isApi) {
+    const apiKey = request.headers.get("x-api-key")
+    if (apiKey) {
+      // API key validation happens in route handler (needs DB)
+      return NextResponse.next()
+    }
+  }
+
+  // Check session cookie
+  const sessionToken = request.cookies.get("ct-session")?.value
+  if (!sessionToken) {
     if (isApi) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     return NextResponse.redirect(new URL("/login", request.url))
+  }
+
+  const session = verifyToken(sessionToken)
+  if (!session) {
+    if (isApi) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    const response = NextResponse.redirect(new URL("/login", request.url))
+    response.cookies.delete("ct-session")
+    return response
   }
 
   return NextResponse.next()

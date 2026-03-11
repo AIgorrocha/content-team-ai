@@ -1,27 +1,12 @@
-import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { withTenantDB } from "@/lib/route-helper"
 import { getSettings, updateSettings } from "@/lib/queries/settings"
 
-export async function GET() {
-  try {
-    const settings = await getSettings()
-    return NextResponse.json(settings)
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    )
-  }
+export async function GET(request: NextRequest) {
+  return withTenantDB(request, (db) => getSettings(db))
 }
 
-export async function PATCH(request: Request) {
-  try {
-    const body = await request.json()
-    const updated = await updateSettings(body)
-    return NextResponse.json(updated)
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    )
-  }
+export async function PATCH(request: NextRequest) {
+  const body = await request.json()
+  return withTenantDB(request, (db) => updateSettings(db, body))
 }

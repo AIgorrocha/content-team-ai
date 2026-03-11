@@ -1,8 +1,8 @@
-import { query } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { DashboardStats, ContentItem } from "@/lib/types"
 
-export async function getDashboardStats(): Promise<DashboardStats> {
-  const [agentStats] = await query<{
+export async function getDashboardStats(db: TenantDB): Promise<DashboardStats> {
+  const [agentStats] = await db.query<{
     total: string
     active: string
     idle: string
@@ -16,7 +16,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     FROM ct_agents
   `)
 
-  const [contentStats] = await query<{
+  const [contentStats] = await db.query<{
     this_week: string
     pending_approval: string
     scheduled: string
@@ -28,7 +28,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     FROM ct_content_items
   `)
 
-  const [pipelineTotal] = await query<{
+  const [pipelineTotal] = await db.query<{
     total_deals: string
     total_value: string
   }>(`
@@ -39,7 +39,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     WHERE status = 'open'
   `)
 
-  const pipelineByStage = await query<{
+  const pipelineByStage = await db.query<{
     name: string
     count: string
     value: string
@@ -54,7 +54,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     ORDER BY ps.position
   `)
 
-  const [emailStats] = await query<{
+  const [emailStats] = await db.query<{
     total_subscribers: string
     campaigns_sent: string
   }>(`
@@ -63,7 +63,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       (SELECT COUNT(*) FROM ct_email_campaigns WHERE status = 'sent') as campaigns_sent
   `)
 
-  const nextContent = await query<ContentItem>(`
+  const nextContent = await db.query<ContentItem>(`
     SELECT * FROM ct_content_items
     WHERE scheduled_at > NOW() AND status IN ('approved', 'scheduled')
     ORDER BY scheduled_at ASC

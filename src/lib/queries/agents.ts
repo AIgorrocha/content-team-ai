@@ -1,12 +1,12 @@
-import { query } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { Agent, Task } from "@/lib/types"
 
 export interface AgentWithTaskCount extends Agent {
   pending_tasks: number
 }
 
-export async function listAgents(): Promise<AgentWithTaskCount[]> {
-  const rows = await query<AgentWithTaskCount>(`
+export async function listAgents(db: TenantDB): Promise<AgentWithTaskCount[]> {
+  const rows = await db.query<AgentWithTaskCount>(`
     SELECT
       a.*,
       COALESCE((
@@ -25,16 +25,15 @@ export async function listAgents(): Promise<AgentWithTaskCount[]> {
   return rows
 }
 
-export async function getAgentBySlug(slug: string): Promise<Agent | null> {
-  const rows = await query<Agent>(
+export async function getAgentBySlug(db: TenantDB, slug: string): Promise<Agent | null> {
+  return db.queryOne<Agent>(
     "SELECT * FROM ct_agents WHERE slug = $1",
     [slug]
   )
-  return rows[0] ?? null
 }
 
-export async function getAgentTasks(slug: string, limit = 20): Promise<Task[]> {
-  return query<Task>(
+export async function getAgentTasks(db: TenantDB, slug: string, limit = 20): Promise<Task[]> {
+  return db.query<Task>(
     `SELECT * FROM ct_tasks
      WHERE assigned_agent = $1
      ORDER BY created_at DESC
@@ -49,12 +48,12 @@ export interface AgentDetail {
   pendingTasks: number
 }
 
-export async function getAgentDetail(slug: string): Promise<AgentDetail | null> {
-  const agent = await getAgentBySlug(slug)
+export async function getAgentDetail(db: TenantDB, slug: string): Promise<AgentDetail | null> {
+  const agent = await getAgentBySlug(db, slug)
   if (!agent) return null
 
-  const tasks = await getAgentTasks(slug)
-  const [countRow] = await query<{ count: string }>(
+  const tasks = await getAgentTasks(db, slug)
+  const [countRow] = await db.query<{ count: string }>(
     "SELECT COUNT(*)::text as count FROM ct_tasks WHERE assigned_agent = $1 AND status = 'pending'",
     [slug]
   )

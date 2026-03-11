@@ -1,8 +1,8 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 import type { Competitor, CompetitorPost } from "@/lib/types"
 
-export async function listCompetitors(): Promise<Competitor[]> {
-  return query<Competitor>(
+export async function listCompetitors(db: TenantDB): Promise<Competitor[]> {
+  return db.query<Competitor>(
     "SELECT * FROM ct_competitors WHERE is_active = true ORDER BY display_name ASC"
   )
 }
@@ -21,10 +21,11 @@ export interface CompetitorWithPosts {
 }
 
 export async function getCompetitorWithPosts(
+  db: TenantDB,
   id: string,
   filters: CompetitorPostFilters = {}
 ): Promise<CompetitorWithPosts | null> {
-  const competitor = await queryOne<Competitor>(
+  const competitor = await db.queryOne<Competitor>(
     "SELECT * FROM ct_competitors WHERE id = $1",
     [id]
   )
@@ -50,14 +51,14 @@ export async function getCompetitorWithPosts(
 
   const where = `WHERE ${conditions.join(" AND ")}`
 
-  const countRows = await query<{ count: string }>(
+  const countRows = await db.query<{ count: string }>(
     `SELECT COUNT(*)::text as count FROM ct_competitor_posts ${where}`,
     params
   )
   const total = parseInt(countRows[0]?.count ?? "0")
 
   const dataParams = [...params, limit, offset]
-  const posts = await query<CompetitorPost>(
+  const posts = await db.query<CompetitorPost>(
     `SELECT * FROM ct_competitor_posts ${where}
      ORDER BY posted_at DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,

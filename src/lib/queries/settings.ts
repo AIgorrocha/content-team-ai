@@ -1,4 +1,4 @@
-import { query, queryOne } from "@/lib/db"
+import type { TenantDB } from "@/lib/tenant-db"
 
 export interface NotificationSettings {
   email_digest: boolean
@@ -34,16 +34,16 @@ interface SettingsRow {
   updated_at: string
 }
 
-export async function getSettings(): Promise<Settings> {
-  const row = await queryOne<SettingsRow>(
+export async function getSettings(db: TenantDB): Promise<Settings> {
+  const row = await db.queryOne<SettingsRow>(
     "SELECT id, settings_data, updated_at FROM ct_settings ORDER BY id LIMIT 1"
   )
   if (!row) return DEFAULT_SETTINGS
   return { ...DEFAULT_SETTINGS, ...row.settings_data }
 }
 
-export async function updateSettings(data: Partial<Settings>): Promise<Settings> {
-  const current = await getSettings()
+export async function updateSettings(db: TenantDB, data: Partial<Settings>): Promise<Settings> {
+  const current = await getSettings(db)
   const merged: Settings = {
     ...current,
     ...data,
@@ -53,17 +53,17 @@ export async function updateSettings(data: Partial<Settings>): Promise<Settings>
     },
   }
 
-  const existing = await queryOne<SettingsRow>(
+  const existing = await db.queryOne<SettingsRow>(
     "SELECT id FROM ct_settings ORDER BY id LIMIT 1"
   )
 
   if (existing) {
-    await query(
+    await db.query(
       "UPDATE ct_settings SET settings_data = $1, updated_at = NOW() WHERE id = $2",
       [JSON.stringify(merged), existing.id]
     )
   } else {
-    await query(
+    await db.query(
       "INSERT INTO ct_settings (settings_data, updated_at) VALUES ($1, NOW())",
       [JSON.stringify(merged)]
     )

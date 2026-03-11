@@ -1,14 +1,10 @@
-import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import { withTenantDB } from "@/lib/route-helper"
 import { listPipelineWithDeals } from "@/lib/queries/crm"
 
-export async function GET() {
-  try {
-    const pipeline = await listPipelineWithDeals()
-    return NextResponse.json({ data: pipeline })
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    )
-  }
+export async function GET(request: NextRequest) {
+  return withTenantDB(request, async (db) => {
+    const pipeline = await listPipelineWithDeals(db)
+    return { data: pipeline }
+  })
 }
