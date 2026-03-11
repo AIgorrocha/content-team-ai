@@ -1,7 +1,7 @@
 project: "Content Team AI"
-current_sprint: 2
-sprint_start: "2026-03-24"
-sprint_end: "2026-04-07"
+current_sprint: 3
+sprint_start: "2026-04-07"
+sprint_end: "2026-04-21"
 velocity_target: 24
 
 sprints:
@@ -55,9 +55,31 @@ sprints:
     completed_points: 24
 
   - number: 3
-    status: "planned"
+    status: "completed"
     goal: "CRM & Email Marketing"
+    stories:
+      - id: "STORY-008"
+        title: "CRM Kanban Pipeline"
+        points: 8
+        status: "completed"
+        completed_at: "2026-03-10"
+      - id: "STORY-009"
+        title: "Contact Management"
+        points: 5
+        status: "completed"
+        completed_at: "2026-03-10"
+      - id: "STORY-010"
+        title: "Email Subscribers & Campaigns"
+        points: 8
+        status: "completed"
+        completed_at: "2026-03-10"
+      - id: "STORY-011"
+        title: "Competitor Monitoring"
+        points: 8
+        status: "completed"
+        completed_at: "2026-03-10"
     total_points: 29
+    completed_points: 29
 
   - number: 4
     status: "planned"

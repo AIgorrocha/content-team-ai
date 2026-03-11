@@ -1,0 +1,68 @@
+import { query, queryOne } from "@/lib/db"
+import type { Competitor, CompetitorPost } from "@/lib/types"
+
+export async function listCompetitors(): Promise<Competitor[]> {
+  return query<Competitor>(
+    "SELECT * FROM ct_competitors WHERE is_active = true ORDER BY display_name ASC"
+  )
+}
+
+export interface CompetitorPostFilters {
+  post_type?: string
+  is_viral?: boolean
+  page?: number
+  limit?: number
+}
+
+export interface CompetitorWithPosts {
+  competitor: Competitor
+  posts: CompetitorPost[]
+  total: number
+}
+
+export async function getCompetitorWithPosts(
+  id: string,
+  filters: CompetitorPostFilters = {}
+): Promise<CompetitorWithPosts | null> {
+  const competitor = await queryOne<Competitor>(
+    "SELECT * FROM ct_competitors WHERE id = $1",
+    [id]
+  )
+
+  if (!competitor) return null
+
+  const { page = 1, limit = 20 } = filters
+  const offset = (page - 1) * limit
+
+  const conditions: string[] = ["competitor_id = $1"]
+  const params: unknown[] = [id]
+  let paramIndex = 2
+
+  if (filters.post_type) {
+    conditions.push(`post_type = $${paramIndex++}`)
+    params.push(filters.post_type)
+  }
+
+  if (filters.is_viral !== undefined) {
+    conditions.push(`is_viral = $${paramIndex++}`)
+    params.push(filters.is_viral)
+  }
+
+  const where = `WHERE ${conditions.join(" AND ")}`
+
+  const countRows = await query<{ count: string }>(
+    `SELECT COUNT(*)::text as count FROM ct_competitor_posts ${where}`,
+    params
+  )
+  const total = parseInt(countRows[0]?.count ?? "0")
+
+  const dataParams = [...params, limit, offset]
+  const posts = await query<CompetitorPost>(
+    `SELECT * FROM ct_competitor_posts ${where}
+     ORDER BY posted_at DESC
+     LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
+    dataParams
+  )
+
+  return { competitor, posts, total }
+}
