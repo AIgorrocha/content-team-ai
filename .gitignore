@@ -1,7 +1,8 @@
 node_modules/
-.next/
-out/
 .env
-.env.local
-*.tsbuildinfo
-next-env.d.ts
+*.png
+*.jpg
+!skills/carousel-generator/assets/igor-photo.jpg
+carousel-temp/
+.DS_Store
+Thumbs.db

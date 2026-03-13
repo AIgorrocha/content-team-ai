@@ -1,0 +1,9 @@
+{
+  "name": "Content Team - Pesquisa Concorrentes",
+  "description": "Diario 6h - Scout pesquisa concorrentes",
+  "schedule": "0 6 * * *",
+  "timezone": "America/Sao_Paulo",
+  "agent": "ct-scout",
+  "prompt": "Pesquise os 8 concorrentes monitorados (ct_competitors) e identifique posts das ultimas 24h. Analise engagement, temas e tendencias. Salve posts relevantes em ct_competitor_posts. Reporte um resumo com os destaques.",
+  "notes": "Importar como workflow n8n ou usar como referencia para crontab"
+}

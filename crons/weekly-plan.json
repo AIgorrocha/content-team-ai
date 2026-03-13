@@ -1,0 +1,9 @@
+{
+  "name": "Content Team - Plano Semanal",
+  "description": "Segunda 7h - Maestro cria plano semanal de conteudo",
+  "schedule": "0 7 * * 1",
+  "timezone": "America/Sao_Paulo",
+  "agent": "ct-maestro",
+  "prompt": "Crie o plano semanal de conteudo para @igorrocha.ia. Consulte o calendario editorial (ct_content_items), verifique conteudos pendentes, analise tendencias recentes dos concorrentes (ct_competitor_posts) e proponha 5-7 conteudos para a semana com datas e plataformas.",
+  "notes": "Importar como workflow n8n ou usar como referencia para crontab"
+}

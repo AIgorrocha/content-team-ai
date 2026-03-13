@@ -1,0 +1,9 @@
+{
+  "name": "Content Team - Verificar Publicacoes",
+  "description": "Diario 8h - Kronos verifica publicacoes do dia",
+  "schedule": "0 8 * * *",
+  "timezone": "America/Sao_Paulo",
+  "agent": "ct-kronos",
+  "prompt": "Verifique publicacoes agendadas para hoje em ct_content_items (WHERE scheduled_at entre inicio e fim do dia AND status = 'scheduled'). Liste o que precisa ser publicado, com horario e plataforma. Se algum conteudo esta atrasado, alerte.",
+  "notes": "Importar como workflow n8n ou usar como referencia para crontab"
+}
