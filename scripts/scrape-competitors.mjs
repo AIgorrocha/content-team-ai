@@ -1,7 +1,10 @@
 /**
  * scrape-competitors.mjs
- * Scraping diario dos concorrentes em Instagram, LinkedIn, X e Reddit.
- * Salva resultados em ct_competitor_posts no Supabase.
+ *
+ * DUAS funcoes separadas:
+ * 1. TRACKING: monitora 9 concorrentes APENAS no Instagram
+ * 2. PESQUISA: busca tendencias em LinkedIn, X, Reddit e GitHub
+ *    filtradas pro publico-alvo do Igor (gestores PME, nao-tecnicos)
  *
  * Uso: node scripts/scrape-competitors.mjs
  * Cron: 0 6 * * * (diario 6h BRT)
@@ -18,47 +21,92 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
+// --- TRACKING: Apenas Instagram ---
 const COMPETITORS_IG = [
   'adamstewartmarketing', 'divyannshisharma', 'oalanicolas', 'charlieautomates',
-  'noevarner.ai', 'liamjohnston.ai', 'odanilogato', 'thaismartan'
+  'noevarner.ai', 'liamjohnston.ai', 'odanilogato', 'thaismartan', 'forgoodcode'
 ]
 
-const COMPETITORS_LINKEDIN = [
-  'Adam Stewart AI marketing', 'Divyannshi Sharma AI automation',
-  'Alani Nicolas AI', 'Charlie automates AI',
-  'Noe Varner AI tools', 'Liam Johnston AI agency',
-  'Danilo Gato AI', 'Thais Marta AI'
+// --- PESQUISA: Tendencias filtradas pro publico-alvo ---
+// Termos escolhidos pra gestores PME, nao-tecnicos, automacao pratica
+const LINKEDIN_SEARCHES = [
+  'IA para pequenas empresas automacao',
+  'AI automation business results ROI',
+  'agentes de IA para gestores',
+  'n8n automacao sem codigo',
+  'Claude AI business use cases',
+  'inteligencia artificial gestao PME'
 ]
 
-const COMPETITORS_X = [
-  'adamstewartmktg', 'divyannshi', 'oalanicolas', 'charlieautomates',
-  'noevarner', 'liamjohnston_ai', 'odanilogato', 'thaismartan'
+const X_SEARCHES = [
+  'AI automation tools trending',
+  'Claude AI new features',
+  'n8n automation workflow',
+  'AI agents for business 2026',
+  'no-code AI automation',
+  'best AI tools productivity'
 ]
 
-const REDDIT_TERMS = [
-  'AI automation business', 'AI agents for business', 'Claude AI tools',
-  'inteligencia artificial negocios', 'AI content creation'
+const REDDIT_SEARCHES = [
+  'site:reddit.com/r/artificial AI business automation',
+  'site:reddit.com/r/ChatGPT best use cases business',
+  'site:reddit.com/r/ClaudeAI workflow automation',
+  'site:reddit.com/r/AutomateYourself AI tools',
+  'site:reddit.com/r/smallbusiness AI automation'
+]
+
+// GitHub: repos trending que podem virar conteudo ou produto
+const GITHUB_SEARCHES = [
+  'AI automation agents stars:>500',
+  'no-code AI workflow stars:>300',
+  'Claude API tools stars:>200',
+  'n8n templates automation stars:>100',
+  'AI business tools open source stars:>500',
+  'whatsapp bot AI stars:>300'
 ]
 
 async function webSearch(query) {
   try {
     const res = await fetch(`https://www.google.com/search?q=${encodeURIComponent(query)}&tbs=qdr:d`, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ContentTeamBot/1.0)' }
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
     })
-    const html = await res.text()
-    return html.substring(0, 5000)
+    return await res.text()
   } catch (err) {
     console.warn(`  Busca falhou: ${query} — ${err.message}`)
     return ''
   }
 }
 
-function extractInsights(html, source) {
+async function searchGitHub(query) {
+  try {
+    const searchTerm = query.replace(/stars:[>]?\d+/g, '').trim()
+    const minStars = query.match(/stars:>(\d+)/)?.[1] || '100'
+    const res = await fetch(
+      `https://api.github.com/search/repositories?q=${encodeURIComponent(searchTerm)}+stars:>${minStars}&sort=stars&order=desc&per_page=5`,
+      { headers: { 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'ContentTeamAI/1.0' } }
+    )
+    const data = await res.json()
+    return (data.items || []).map(repo => ({
+      name: repo.full_name,
+      description: repo.description || '',
+      stars: repo.stargazers_count,
+      url: repo.html_url,
+      language: repo.language,
+      topics: repo.topics || [],
+      updated: repo.updated_at
+    }))
+  } catch (err) {
+    console.warn(`  GitHub busca falhou: ${err.message}`)
+    return []
+  }
+}
+
+function extractSnippets(html) {
   const snippets = []
   const matches = html.match(/<span[^>]*>(.*?)<\/span>/g) || []
   for (const m of matches) {
     const text = m.replace(/<[^>]+>/g, '').trim()
-    if (text.length > 30 && text.length < 500) {
+    if (text.length > 40 && text.length < 500) {
       snippets.push(text)
     }
   }
@@ -70,100 +118,159 @@ async function savePost(data) {
     .from('ct_competitor_posts')
     .upsert(data, { onConflict: 'external_id' })
 
-  if (error) {
-    console.warn(`  Erro salvando: ${error.message}`)
-  }
+  if (error) console.warn(`  Erro salvando: ${error.message}`)
 }
 
-async function scrapeInstagram() {
-  console.log('\n📸 Instagram — scraping via WebSearch...')
+// === PARTE 1: TRACKING DE CONCORRENTES (Instagram) ===
+async function trackInstagram() {
+  console.log('📸 TRACKING — 9 concorrentes no Instagram')
+  let count = 0
   for (const handle of COMPETITORS_IG) {
     console.log(`  @${handle}...`)
     const html = await webSearch(`site:instagram.com ${handle} post`)
-    const snippets = extractInsights(html, 'instagram')
+    const snippets = extractSnippets(html)
     for (const snippet of snippets) {
       await savePost({
         external_id: `ig_${handle}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         competitor_handle: handle,
         platform: 'instagram',
+        source_type: 'competitor_tracking',
         content_preview: snippet,
         scraped_at: new Date().toISOString()
       })
+      count++
     }
   }
+  return count
 }
 
-async function scrapeLinkedIn() {
-  console.log('\n💼 LinkedIn — scraping via WebSearch...')
-  for (const name of COMPETITORS_LINKEDIN) {
-    console.log(`  ${name}...`)
-    const html = await webSearch(`site:linkedin.com/posts "${name}"`)
-    const snippets = extractInsights(html, 'linkedin')
-    for (const snippet of snippets) {
-      await savePost({
-        external_id: `li_${name.replace(/\s/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        competitor_handle: name,
-        platform: 'linkedin',
-        content_preview: snippet,
-        scraped_at: new Date().toISOString()
-      })
-    }
-  }
-}
-
-async function scrapeX() {
-  console.log('\n🐦 X/Twitter — scraping via WebSearch...')
-  for (const handle of COMPETITORS_X) {
-    console.log(`  @${handle}...`)
-    const html = await webSearch(`site:x.com ${handle}`)
-    const snippets = extractInsights(html, 'x')
-    for (const snippet of snippets) {
-      await savePost({
-        external_id: `x_${handle}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        competitor_handle: handle,
-        platform: 'x',
-        content_preview: snippet,
-        scraped_at: new Date().toISOString()
-      })
-    }
-  }
-}
-
-async function scrapeReddit() {
-  console.log('\n🟠 Reddit — scraping via WebSearch...')
-  for (const term of REDDIT_TERMS) {
+// === PARTE 2: PESQUISA DE TENDENCIAS (LinkedIn, X, Reddit, GitHub) ===
+async function researchLinkedIn() {
+  console.log('\n💼 PESQUISA — Tendencias LinkedIn (filtro: gestores PME)')
+  let count = 0
+  for (const term of LINKEDIN_SEARCHES) {
     console.log(`  "${term}"...`)
-    const html = await webSearch(`site:reddit.com ${term}`)
-    const snippets = extractInsights(html, 'reddit')
+    const html = await webSearch(`site:linkedin.com ${term}`)
+    const snippets = extractSnippets(html)
     for (const snippet of snippets) {
       await savePost({
-        external_id: `rd_${term.replace(/\s/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        external_id: `li_${term.slice(0, 20).replace(/\s/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         competitor_handle: term,
-        platform: 'reddit',
+        platform: 'linkedin',
+        source_type: 'trend_research',
         content_preview: snippet,
         scraped_at: new Date().toISOString()
       })
+      count++
     }
   }
+  return count
+}
+
+async function researchX() {
+  console.log('\n🐦 PESQUISA — Tendencias X/Twitter (filtro: ferramentas praticas)')
+  let count = 0
+  for (const term of X_SEARCHES) {
+    console.log(`  "${term}"...`)
+    const html = await webSearch(`site:x.com ${term}`)
+    const snippets = extractSnippets(html)
+    for (const snippet of snippets) {
+      await savePost({
+        external_id: `x_${term.slice(0, 20).replace(/\s/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        competitor_handle: term,
+        platform: 'x',
+        source_type: 'trend_research',
+        content_preview: snippet,
+        scraped_at: new Date().toISOString()
+      })
+      count++
+    }
+  }
+  return count
+}
+
+async function researchReddit() {
+  console.log('\n🟠 PESQUISA — Reddit (filtro: casos reais, tutoriais)')
+  let count = 0
+  for (const term of REDDIT_SEARCHES) {
+    console.log(`  "${term.replace('site:reddit.com/', '')}"...`)
+    const html = await webSearch(term)
+    const snippets = extractSnippets(html)
+    for (const snippet of snippets) {
+      await savePost({
+        external_id: `rd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        competitor_handle: term.replace('site:reddit.com/', ''),
+        platform: 'reddit',
+        source_type: 'trend_research',
+        content_preview: snippet,
+        scraped_at: new Date().toISOString()
+      })
+      count++
+    }
+  }
+  return count
+}
+
+async function researchGitHub() {
+  console.log('\n🐙 PESQUISA — GitHub Repos (filtro: bem avaliados, uteis pra conteudo/produto)')
+  let count = 0
+  for (const query of GITHUB_SEARCHES) {
+    console.log(`  "${query}"...`)
+    const repos = await searchGitHub(query)
+    for (const repo of repos) {
+      await savePost({
+        external_id: `gh_${repo.name.replace('/', '_')}_${Date.now()}`,
+        competitor_handle: repo.name,
+        platform: 'github',
+        source_type: 'repo_research',
+        content_preview: `⭐ ${repo.stars} | ${repo.language || 'n/a'} | ${repo.description} | ${repo.url}`,
+        scraped_at: new Date().toISOString()
+      })
+      count++
+      console.log(`    ⭐ ${repo.stars} — ${repo.name}: ${repo.description?.substring(0, 80)}`)
+    }
+  }
+  return count
 }
 
 async function main() {
-  console.log('🔍 Content Team — Scraping de Concorrentes')
-  console.log(`📅 ${new Date().toISOString()}\n`)
+  console.log('🔍 Content Team — Scraping Diario')
+  console.log(`📅 ${new Date().toISOString()}`)
+  console.log('=' .repeat(60))
 
-  await scrapeInstagram()
-  await scrapeLinkedIn()
-  await scrapeX()
-  await scrapeReddit()
+  // PARTE 1: Tracking (Instagram)
+  const igCount = await trackInstagram()
 
-  // Contar resultados do dia
-  const today = new Date().toISOString().split('T')[0]
-  const { count } = await supabase
-    .from('ct_competitor_posts')
-    .select('*', { count: 'exact', head: true })
-    .gte('scraped_at', `${today}T00:00:00`)
+  // PARTE 2: Pesquisa de tendencias
+  const liCount = await researchLinkedIn()
+  const xCount = await researchX()
+  const rdCount = await researchReddit()
+  const ghCount = await researchGitHub()
 
-  console.log(`\n✅ Scraping completo! ${count || 0} posts salvos hoje.`)
+  const total = igCount + liCount + xCount + rdCount + ghCount
+
+  console.log('\n' + '='.repeat(60))
+  console.log('📊 Resumo:')
+  console.log(`  📸 Instagram (tracking): ${igCount} posts`)
+  console.log(`  💼 LinkedIn (pesquisa): ${liCount} tendencias`)
+  console.log(`  🐦 X/Twitter (pesquisa): ${xCount} tendencias`)
+  console.log(`  🟠 Reddit (pesquisa): ${rdCount} tendencias`)
+  console.log(`  🐙 GitHub (repos): ${ghCount} repos`)
+  console.log(`  📦 Total: ${total} itens salvos`)
+
+  // Notificar Telegram se tiver token
+  const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+  const TG_CHAT = process.env.TELEGRAM_CHAT_ID
+  if (TG_TOKEN && TG_CHAT && total > 0) {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TG_CHAT,
+        text: `Scraping diario completo\n\nIG tracking: ${igCount}\nLinkedIn: ${liCount}\nX: ${xCount}\nReddit: ${rdCount}\nGitHub repos: ${ghCount}\nTotal: ${total}`
+      })
+    }).catch(() => {})
+  }
 }
 
 main().catch(err => {

@@ -1,8 +1,6 @@
 # Concorrentes Monitorados
 
-8 perfis analisados diariamente pelo Scout em TODAS as plataformas.
-
-## Instagram
+9 perfis monitorados diariamente pelo Scout **APENAS no Instagram**.
 
 | # | Handle | Nicho |
 |---|--------|-------|
@@ -14,53 +12,40 @@
 | 6 | @liamjohnston.ai | AI agency |
 | 7 | @odanilogato | AI BR |
 | 8 | @thaismartan | AI BR |
+| 9 | @forgoodcode | AI dev / code tools |
 
-## LinkedIn
-
-| # | Perfil | Nicho |
-|---|--------|-------|
-| 1 | Adam Stewart | AI marketing agency |
-| 2 | Divyannshi Sharma | AI automation consulting |
-| 3 | Alani Nicolas | AI business BR |
-| 4 | Charlie (charlieautomates) | AI automation |
-| 5 | Noe Varner | AI tools / productivity |
-| 6 | Liam Johnston | AI agency building |
-| 7 | Danilo Gato | AI BR / marketing digital |
-| 8 | Thais Marta | AI BR / content creation |
-
-## X / Twitter
-
-| # | Handle | Nicho |
-|---|--------|-------|
-| 1 | @adamstewartmktg | AI marketing |
-| 2 | @divyannshi | AI automation |
-| 3 | @oalanicolas | AI business BR |
-| 4 | @charlieautomates | AI automation |
-| 5 | @noevarner | AI tools |
-| 6 | @liamjohnston_ai | AI agency |
-| 7 | @odanilogato | AI BR |
-| 8 | @thaismartan | AI BR |
-
-## Reddit / Comunidades
-
-| # | Subreddit ou Termo | Relevancia |
-|---|-------------------|------------|
-| 1 | r/artificial | Tendencias IA geral |
-| 2 | r/ChatGPT | Ferramentas IA populares |
-| 3 | r/ClaudeAI | Claude / Anthropic |
-| 4 | r/AutomateYourself | Automacao com IA |
-| 5 | r/brdev | Dev BR / mercado tech |
-| 6 | "AI automation business" | Busca tematica |
-| 7 | "AI agents for business" | Agentes IA |
-| 8 | "inteligencia artificial negocios" | IA BR |
-
-## O Que Monitorar
+## O Que Monitorar (Instagram)
 
 - Frequencia de postagem
-- Tipos de conteudo (carrossel, reel, foto, video, thread, artigo)
+- Tipos de conteudo (carrossel, reel, foto, video)
 - Temas abordados
-- Engagement (likes, comments, shares, reposts)
+- Engagement (likes, comments, shares)
 - Hashtags utilizadas
 - Horarios de publicacao
 - Conteudos virais (acima da media de engagement)
-- Formatos que mais engajam por plataforma
+- Formatos que mais engajam
+
+## Pesquisa de Tendencias (SEPARADO do tracking)
+
+Alem do tracking de concorrentes no IG, o Scout faz PESQUISA de tendencias
+em outras plataformas. A pesquisa NAO e tracking de perfis — e busca por
+TEMAS relevantes pro publico-alvo do Igor.
+
+### Fontes de Pesquisa
+
+| Plataforma | O Que Pesquisar | Filtro |
+|------------|----------------|--------|
+| LinkedIn | Posts trending sobre IA para negocios, automacao, agentes | Foco em gestores PME, nao-tecnicos |
+| X/Twitter | Trending topics de IA, novas ferramentas, debates | Ferramentas praticas, nao papers academicos |
+| Reddit | r/artificial, r/ChatGPT, r/ClaudeAI, r/AutomateYourself | Casos de uso reais, tutoriais, dicas |
+| GitHub | Repos trending em AI/automation, bem avaliados (stars, forks) | Repos que podem virar conteudo ou produto/servico |
+
+### Criterios de Relevancia (baseado no brand-profile.md)
+
+A pesquisa deve filtrar APENAS o que interessa ao publico do Igor:
+- Automacao pratica (nao teoria)
+- IA para gestores nao-tecnicos (nao para devs avancados)
+- Ferramentas acessiveis (Claude, n8n, Supabase, etc)
+- Cases com resultados reais (numeros, economia de tempo)
+- Repos GitHub que possam virar tutorial, ferramenta ou servico
+- Tendencias que impactam PMEs brasileiras
