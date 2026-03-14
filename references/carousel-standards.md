@@ -64,12 +64,10 @@ HTML + Playwright garante que o resultado e pixel-perfect e consistente.
 4. 5 hashtags
 - NUNCA usar frases auto-referenciais ("nesse carrossel eu mostro", "nesse post explico", "nesse reels")
 
-### Versao Threads (OBRIGATORIA para carrosseis)
-- SEMPRE criar versao da legenda com ate 500 caracteres para Threads
-- Manter gancho, essencia do conteudo e CTA
-- Remover lista de topicos se necessario pra caber
-- Manter as 5 hashtags
-- Salvar no mesmo arquivo de legenda com separador "--- THREADS (max 500 caracteres) ---"
+### Legenda unica para todas as redes
+- A MESMA legenda e usada em Instagram, Threads e qualquer outra rede
+- Publica no Instagram e compartilha — nao criar versoes separadas
+- UMA legenda por post, ponto final
 
 ## Especificacoes Tecnicas
 
