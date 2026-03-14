@@ -154,100 +154,84 @@ async function scrapeInstagram(page) {
   return count
 }
 
-// --- LINKEDIN + X: Via DuckDuckGo (nao bloqueia VPS) ---
-async function scrapeDuckDuckGo(page, queries, platform, label) {
+// --- SEARXNG: Metabuscador local (http://localhost:8888) ---
+const SEARXNG_URL = 'http://localhost:8888'
+
+async function searchSearXNG(query, maxResults = 5) {
+  try {
+    const res = await fetch(`${SEARXNG_URL}/search?q=${encodeURIComponent(query)}&format=json`, {
+      headers: { 'Accept': 'application/json' }
+    })
+    const data = await res.json()
+    return (data.results || []).slice(0, maxResults).map(r => ({
+      title: r.title || '',
+      snippet: r.content || '',
+      url: r.url || ''
+    }))
+  } catch (err) {
+    console.warn(`    SearXNG erro: ${err.message.substring(0, 80)}`)
+    return []
+  }
+}
+
+// --- LINKEDIN + X + REDDIT: Via SearXNG local ---
+async function searchPlatform(queries, platform, label) {
   console.log(`\n${label}`)
   let count = 0
 
   for (const query of queries) {
     console.log(`  "${query.substring(0, 60)}..."`)
-    try {
-      await page.goto(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
-        waitUntil: 'domcontentloaded', timeout: 15000
-      })
-      await page.waitForTimeout(2000)
+    const results = await searchSearXNG(query, 5)
 
-      const results = await page.evaluate(() => {
-        const items = []
-        document.querySelectorAll('.result').forEach(el => {
-          const titleEl = el.querySelector('.result__title a, .result__a')
-          const snippetEl = el.querySelector('.result__snippet')
-          if (titleEl && snippetEl) {
-            items.push({
-              title: titleEl.textContent.trim(),
-              snippet: snippetEl.textContent.trim()
-            })
-          }
+    for (const r of results) {
+      const text = `${r.title}\n${r.snippet}`
+      if (text.length > 30) {
+        const saved = await savePost({
+          external_id: `${platform}_${uid()}`,
+          competitor_handle: query.substring(0, 50),
+          platform,
+          source_type: 'trend_research',
+          content_preview: text.substring(0, 500),
+          scraped_at: new Date().toISOString()
         })
-        return items.slice(0, 5)
-      })
-
-      for (const r of results) {
-        const text = `${r.title}\n${r.snippet}`
-        if (text.length > 30) {
-          const saved = await savePost({
-            external_id: `${platform}_${uid()}`,
-            competitor_handle: query.substring(0, 50),
-            platform,
-            source_type: 'trend_research',
-            content_preview: text.substring(0, 500),
-            scraped_at: new Date().toISOString()
-          })
-          if (saved) count++
-        }
+        if (saved) count++
       }
-
-      console.log(`    ${results.length} resultados`)
-    } catch (err) {
-      console.warn(`    Erro: ${err.message.substring(0, 80)}`)
     }
-    await page.waitForTimeout(1500 + Math.random() * 1500)
+
+    console.log(`    ${results.length} resultados`)
+    await new Promise(r => setTimeout(r, 500))
   }
   return count
 }
 
-async function scrapeLinkedIn(page) {
+async function scrapeLinkedIn() {
   const queries = RESEARCH_QUERIES.linkedin.map(q => `site:linkedin.com ${q}`)
-  return scrapeDuckDuckGo(page, queries, 'linkedin', '💼 PESQUISA — LinkedIn (via DuckDuckGo)')
+  return searchPlatform(queries, 'linkedin', '💼 PESQUISA — LinkedIn (via SearXNG)')
 }
 
-async function scrapeX(page) {
+async function scrapeX() {
   const queries = RESEARCH_QUERIES.x_nitter.map(q => `site:x.com ${q}`)
-  return scrapeDuckDuckGo(page, queries, 'x', '🐦 PESQUISA — X/Twitter (via DuckDuckGo)')
+  return searchPlatform(queries, 'x', '🐦 PESQUISA — X/Twitter (via SearXNG)')
 }
 
-// --- REDDIT: Direto (publico, sem login) ---
-async function scrapeReddit(page) {
-  console.log('\n🟠 PESQUISA — Reddit (direto, sem login)')
+// --- REDDIT: Via SearXNG ---
+async function scrapeReddit() {
+  console.log('\n🟠 PESQUISA — Reddit (via SearXNG)')
   let count = 0
 
   for (const config of RESEARCH_QUERIES.reddit) {
     console.log(`  r/${config.sub}${config.query ? ` "${config.query}"` : ''}...`)
     try {
-      // Reddit via DuckDuckGo (mais confiavel que acessar direto)
-      const ddgQuery = config.query
+      const query = config.query
         ? `site:reddit.com/r/${config.sub} ${config.query}`
-        : `site:reddit.com/r/${config.sub} AI`
-      await page.goto(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(ddgQuery)}`, {
-        waitUntil: 'domcontentloaded', timeout: 15000
-      })
-      await page.waitForTimeout(2000)
+        : `site:reddit.com/r/${config.sub} AI agents`
+      const results = await searchSearXNG(query, 8)
 
-      const posts = await page.evaluate(() => {
-        const items = []
-        document.querySelectorAll('.result').forEach(el => {
-          const titleEl = el.querySelector('.result__title a, .result__a')
-          const snippetEl = el.querySelector('.result__snippet')
-          if (titleEl && snippetEl) {
-            items.push({
-              title: titleEl.textContent.trim(),
-              score: '?',
-              url: ''
-            })
-          }
-        })
-        return items.slice(0, 8).filter(p => p.title.length > 15)
-      })
+      const posts = results.filter(r => r.title.length > 15).map(r => ({
+        title: r.title,
+        score: '?',
+        url: r.url
+      }))
 
       for (const post of posts) {
         if (post.title.length > 15) {
@@ -344,10 +328,10 @@ async function main() {
 
   try {
     igCount = await scrapeInstagram(page)
-    liCount = await scrapeLinkedIn(page)
-    xCount = await scrapeX(page)
-    rdCount = await scrapeReddit(page)
-    ghCount = await scrapeGitHub() // Nao precisa de browser
+    liCount = await scrapeLinkedIn()
+    xCount = await scrapeX()
+    rdCount = await scrapeReddit()
+    ghCount = await scrapeGitHub()
   } finally {
     await browser.close()
   }
