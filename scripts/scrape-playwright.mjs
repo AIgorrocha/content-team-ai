@@ -169,16 +169,16 @@ async function scrapeLinkedIn(page) {
 
       const results = await page.evaluate(() => {
         const items = []
-        document.querySelectorAll('div.g, div[data-sokoban-container]').forEach(el => {
-          const titleEl = el.querySelector('h3')
-          const snippetEl = el.querySelector('div[data-sncf], span[style*="line-clamp"], div.VwiC3b')
-          const linkEl = el.querySelector('a[href*="linkedin.com"]')
-
-          if (titleEl && snippetEl) {
+        // Abordagem robusta: pegar todos h3 + textos proximos
+        document.querySelectorAll('h3').forEach(h3 => {
+          const parent = h3.closest('div')
+          if (!parent) return
+          const allText = parent.innerText || ''
+          const lines = allText.split('\n').filter(l => l.length > 30)
+          if (lines.length > 0) {
             items.push({
-              title: titleEl.textContent.trim(),
-              snippet: snippetEl.textContent.trim(),
-              url: linkEl ? linkEl.href : ''
+              title: h3.textContent.trim(),
+              snippet: lines.slice(0, 2).join(' ').substring(0, 300)
             })
           }
         })
@@ -227,13 +227,15 @@ async function scrapeX(page) {
 
       const results = await page.evaluate(() => {
         const items = []
-        document.querySelectorAll('div.g').forEach(el => {
-          const titleEl = el.querySelector('h3')
-          const snippetEl = el.querySelector('div.VwiC3b, span[style*="line-clamp"]')
-          if (titleEl && snippetEl) {
+        document.querySelectorAll('h3').forEach(h3 => {
+          const parent = h3.closest('div')
+          if (!parent) return
+          const allText = parent.innerText || ''
+          const lines = allText.split('\n').filter(l => l.length > 30)
+          if (lines.length > 0) {
             items.push({
-              title: titleEl.textContent.trim(),
-              snippet: snippetEl.textContent.trim()
+              title: h3.textContent.trim(),
+              snippet: lines.slice(0, 2).join(' ').substring(0, 300)
             })
           }
         })
@@ -270,30 +272,24 @@ async function scrapeReddit(page) {
   let count = 0
 
   for (const config of RESEARCH_QUERIES.reddit) {
-    const url = config.query
-      ? `https://old.reddit.com/r/${config.sub}/search?q=${encodeURIComponent(config.query)}&restrict_sr=on&sort=relevance&t=week`
-      : `https://old.reddit.com/r/${config.sub}/${config.sort || 'hot'}/`
+    const jsonUrl = config.query
+      ? `https://www.reddit.com/r/${config.sub}/search.json?q=${encodeURIComponent(config.query)}&restrict_sr=on&sort=relevance&t=week&limit=8`
+      : `https://www.reddit.com/r/${config.sub}/${config.sort || 'hot'}.json?limit=8`
 
     console.log(`  r/${config.sub}${config.query ? ` "${config.query}"` : ''}...`)
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 })
-      await page.waitForTimeout(2000)
-
-      const posts = await page.evaluate(() => {
-        const items = []
-        document.querySelectorAll('div.thing[data-type="link"]').forEach(el => {
-          const titleEl = el.querySelector('a.title')
-          const scoreEl = el.querySelector('div.score.unvoted')
-          if (titleEl) {
-            items.push({
-              title: titleEl.textContent.trim(),
-              score: scoreEl ? scoreEl.textContent.trim() : '0',
-              url: titleEl.href
-            })
-          }
-        })
-        return items.slice(0, 8)
+      // Reddit JSON API (publico, sem login)
+      const res = await fetch(jsonUrl, {
+        headers: { 'User-Agent': 'ContentTeamAI/1.0 (research bot)' }
       })
+      const json = await res.json()
+      const children = json?.data?.children || []
+
+      const posts = children.map(c => ({
+        title: c.data?.title || '',
+        score: c.data?.score || 0,
+        url: `https://reddit.com${c.data?.permalink || ''}`
+      })).filter(p => p.title.length > 15)
 
       for (const post of posts) {
         if (post.title.length > 15) {
@@ -365,10 +361,26 @@ async function main() {
   const context = await browser.newContext({
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     viewport: { width: 1280, height: 800 },
-    locale: 'pt-BR'
+    locale: 'en-US',
+    geolocation: { latitude: -23.55, longitude: -46.63 },
+    timezoneId: 'America/Sao_Paulo'
   })
 
   const page = await context.newPage()
+
+  // Aceitar cookies do Google (GDPR)
+  try {
+    await page.goto('https://www.google.com', { waitUntil: 'domcontentloaded', timeout: 10000 })
+    const consentBtn = await page.$('button:has-text("Accept"), button:has-text("Aceitar"), button:has-text("I agree")')
+    if (consentBtn) { await consentBtn.click(); await page.waitForTimeout(1000) }
+  } catch {}
+
+  // Aceitar cookies do Reddit
+  try {
+    await page.goto('https://old.reddit.com', { waitUntil: 'domcontentloaded', timeout: 10000 })
+    const redditBtn = await page.$('button:has-text("Accept"), button:has-text("OK")')
+    if (redditBtn) { await redditBtn.click(); await page.waitForTimeout(1000) }
+  } catch {}
 
   let igCount = 0, liCount = 0, xCount = 0, rdCount = 0, ghCount = 0
 
