@@ -62,6 +62,14 @@ HTML + Playwright garante que o resultado e pixel-perfect e consistente.
 2. Corpo com valor (2-3 paragrafos curtos)
 3. CTA (chamada para acao)
 4. 5 hashtags
+- NUNCA usar frases auto-referenciais ("nesse carrossel eu mostro", "nesse post explico", "nesse reels")
+
+### Versao Threads (OBRIGATORIA para carrosseis)
+- SEMPRE criar versao da legenda com ate 500 caracteres para Threads
+- Manter gancho, essencia do conteudo e CTA
+- Remover lista de topicos se necessario pra caber
+- Manter as 5 hashtags
+- Salvar no mesmo arquivo de legenda com separador "--- THREADS (max 500 caracteres) ---"
 
 ## Especificacoes Tecnicas
 
