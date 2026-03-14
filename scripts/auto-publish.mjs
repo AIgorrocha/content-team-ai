@@ -47,7 +47,7 @@ async function notifyTelegram(message) {
 async function updateStatus(id, status, notes) {
   const { error } = await supabase
     .from('ct_content_items')
-    .update({ status, published_at: status === 'published' ? new Date().toISOString() : null, notes })
+    .update({ status, published_at: status === 'published' ? new Date().toISOString() : null, approval_notes: notes })
     .eq('id', id)
 
   if (error) console.warn(`  Erro atualizando ${id}: ${error.message}`)
@@ -69,7 +69,7 @@ async function publishInstagram(item) {
 
   try {
     const script = resolve(__dirname, 'post-carousel.mjs')
-    const caption = item.content_body || item.title
+    const caption = item.caption || item.content_body || item.title
     execSync(`node "${script}" ${images.join(' ')} --caption="${caption.replace(/"/g, '\\"')}"`, {
       env: process.env,
       stdio: 'inherit'
@@ -102,7 +102,7 @@ async function publishLinkedIn(item) {
       },
       body: JSON.stringify({
         author: `urn:li:person:${LINKEDIN_PERSON_ID}`,
-        commentary: item.content_body || item.title,
+        commentary: item.caption || item.content_body || item.title,
         visibility: 'PUBLIC',
         distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] },
         lifecycleState: 'PUBLISHED',

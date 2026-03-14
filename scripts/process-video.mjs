@@ -234,7 +234,7 @@ async function main() {
       status: 'draft',
       source_url: videoUrl || videoFile,
       created_by: 'process-video',
-      notes: `Corte ${script.startTime}s-${script.endTime}s, avatar: ${script.avatar}`
+      approval_notes: `Corte ${script.startTime}s-${script.endTime}s, avatar: ${script.avatar}`
     })
   }
 

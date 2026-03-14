@@ -187,7 +187,7 @@ async function rejectContent(shortId, reason) {
 
   const { error } = await supabase
     .from('ct_content_items')
-    .update({ status: 'rejected', notes: reason || 'Rejeitado pelo Igor' })
+    .update({ status: 'rejected', approval_notes: reason || 'Rejeitado pelo Igor' })
     .eq('id', items[0].id)
 
   if (error) {

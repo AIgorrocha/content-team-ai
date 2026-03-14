@@ -98,7 +98,7 @@ function generatePlan(trends, existingItems, weekDates) {
       status: 'planned',
       scheduled_at: `${day}T10:00:00-03:00`,
       created_by: 'kronos-auto',
-      notes: `Gerado automaticamente. Tendencias: ${trends.slice(0, 3).map(t => t.content_preview?.substring(0, 50)).join('; ')}`
+      approval_notes: `Gerado automaticamente. Tendencias: ${trends.slice(0, 3).map(t => t.content_preview?.substring(0, 50)).join('; ')}`
     })
   }
 

@@ -208,7 +208,7 @@ async function main() {
     status: 'draft',
     source_url: 'cross-post:instagram',
     created_by: 'remix-auto',
-    notes: `${xThread.length} tweets na thread`
+    approval_notes: `${xThread.length} tweets na thread`
   })
   console.log(`  📝 Thread com ${xThread.length} tweets salva como draft`)
 
@@ -223,7 +223,7 @@ async function main() {
     status: 'draft',
     source_url: 'cross-post:instagram',
     created_by: 'doppel-auto',
-    notes: `Avatar: ${tiktokScript.avatar}, ${tiktokScript.duration}`
+    approval_notes: `Avatar: ${tiktokScript.avatar}, ${tiktokScript.duration}`
   })
   console.log(`  📝 Script TikTok salvo (${tiktokScript.duration}, avatar ${tiktokScript.avatar})`)
 
@@ -238,7 +238,7 @@ async function main() {
     status: 'draft',
     source_url: 'cross-post:instagram',
     created_by: 'doppel-auto',
-    notes: `Avatar: ${shortsScript.avatar}, ${shortsScript.duration}`
+    approval_notes: `Avatar: ${shortsScript.avatar}, ${shortsScript.duration}`
   })
   console.log(`  📝 Script Shorts salvo (${shortsScript.duration}, avatar ${shortsScript.avatar})`)
 
