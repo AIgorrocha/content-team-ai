@@ -64,10 +64,11 @@ HTML + Playwright garante que o resultado e pixel-perfect e consistente.
 4. 5 hashtags
 - NUNCA usar frases auto-referenciais ("nesse carrossel eu mostro", "nesse post explico", "nesse reels")
 
-### Legenda unica para todas as redes
-- A MESMA legenda e usada em Instagram, Threads e qualquer outra rede
-- Publica no Instagram e compartilha — nao criar versoes separadas
-- UMA legenda por post, ponto final
+### Legendas por plataforma
+- **Instagram + Threads** — MESMA legenda. Publica no IG e compartilha pro Threads
+- **LinkedIn** — Legenda DIFERENTE, adaptada ao tom profissional da plataforma
+- **TikTok** — NAO tem carrossel, nao criar legenda
+- Salvar no mesmo arquivo com separador "--- LINKEDIN ---"
 
 ## Especificacoes Tecnicas
 
