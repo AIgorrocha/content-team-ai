@@ -1,23 +1,15 @@
 Claude Cowork não é chatbot.
 
-Ele mora no seu computador. Lê suas pastas. Escreve documentos. Cria planilhas. Tudo direto no seu ambiente.
+Ele mora no seu computador. Lê suas pastas. Escreve documentos. Cria planilhas. Tudo no seu ambiente.
 
-Eu descrevo o que preciso. Ele me faz 3 perguntas. Pronto. Volto 20 minutos depois e o documento está pronto.
+Eu descrevo o que preciso. Ele me faz 3 perguntas. Volto 20 minutos depois e está pronto.
 
 Esse ciclo já cobre 60% do meu trabalho de escritório.
-
-— O que o Cowork realmente faz
-— O ciclo de trabalho que uso todo dia
-— Como dar acesso aos seus arquivos
-— A estratégia dos arquivos de contexto
-— O primeiro prompt depois de configurar
-— Como instalar extensões sem programar
-— Automatização de tarefas repetitivas
 
 Pare de pensar em prompts melhores.
 Comece a pensar em arquivos melhores.
 
-Quer o passo a passo completo? Comenta COWORK que te mando.
+Quer o passo a passo? Comenta COWORK.
 
 #claudecowork #iaparaempresas #automacao #produtividade #agentesia
 
