@@ -154,88 +154,28 @@ async function scrapeInstagram(page) {
   return count
 }
 
-// --- LINKEDIN: Via Google (sem login) ---
-async function scrapeLinkedIn(page) {
-  console.log('\n💼 PESQUISA — LinkedIn (via Google, sem login)')
+// --- LINKEDIN + X: Via DuckDuckGo (nao bloqueia VPS) ---
+async function scrapeDuckDuckGo(page, queries, platform, label) {
+  console.log(`\n${label}`)
   let count = 0
-
-  for (const query of RESEARCH_QUERIES.linkedin) {
-    console.log(`  "${query.substring(0, 60)}..."`)
-    try {
-      await page.goto(`https://www.google.com/search?q=${encodeURIComponent(query)}&tbs=qdr:w`, {
-        waitUntil: 'domcontentloaded', timeout: 15000
-      })
-      await page.waitForTimeout(2000)
-
-      const results = await page.evaluate(() => {
-        const items = []
-        // Abordagem robusta: pegar todos h3 + textos proximos
-        document.querySelectorAll('h3').forEach(h3 => {
-          const parent = h3.closest('div')
-          if (!parent) return
-          const allText = parent.innerText || ''
-          const lines = allText.split('\n').filter(l => l.length > 30)
-          if (lines.length > 0) {
-            items.push({
-              title: h3.textContent.trim(),
-              snippet: lines.slice(0, 2).join(' ').substring(0, 300)
-            })
-          }
-        })
-        return items.slice(0, 5)
-      })
-
-      for (const r of results) {
-        const text = `${r.title}\n${r.snippet}`
-        if (text.length > 30) {
-          const saved = await savePost({
-            external_id: `li_${uid()}`,
-            competitor_handle: query.substring(0, 50),
-            platform: 'linkedin',
-            source_type: 'trend_research',
-            content_preview: text.substring(0, 500),
-            scraped_at: new Date().toISOString()
-          })
-          if (saved) count++
-        }
-      }
-
-      console.log(`    ${results.length} resultados`)
-    } catch (err) {
-      console.warn(`    Erro: ${err.message.substring(0, 80)}`)
-    }
-    await page.waitForTimeout(2000 + Math.random() * 2000)
-  }
-  return count
-}
-
-// --- X/TWITTER: Via Nitter (sem login) ---
-async function scrapeX(page) {
-  console.log('\n🐦 PESQUISA — X/Twitter (via Google, sem login)')
-  let count = 0
-
-  // Nitter mirrors mudam frequentemente, usar Google como fallback
-  const queries = RESEARCH_QUERIES.x_nitter.map(q => `site:x.com OR site:nitter.net "${q}"`)
 
   for (const query of queries) {
     console.log(`  "${query.substring(0, 60)}..."`)
     try {
-      await page.goto(`https://www.google.com/search?q=${encodeURIComponent(query)}&tbs=qdr:w`, {
+      await page.goto(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
         waitUntil: 'domcontentloaded', timeout: 15000
       })
       await page.waitForTimeout(2000)
 
       const results = await page.evaluate(() => {
         const items = []
-        document.querySelectorAll('h3').forEach(h3 => {
-          const parent = h3.closest('div')
-          if (!parent) return
-          const allText = parent.innerText || ''
-          const lines = allText.split('\n').filter(l => l.length > 30)
-          if (lines.length > 0) {
+        document.querySelectorAll('.result').forEach(el => {
+          const titleEl = el.querySelector('.result__title a, .result__a')
+          const snippetEl = el.querySelector('.result__snippet')
+          if (titleEl && snippetEl) {
             items.push({
-              title: h3.textContent.trim(),
-              snippet: lines.slice(0, 2).join(' ').substring(0, 300)
+              title: titleEl.textContent.trim(),
+              snippet: snippetEl.textContent.trim()
             })
           }
         })
@@ -246,9 +186,9 @@ async function scrapeX(page) {
         const text = `${r.title}\n${r.snippet}`
         if (text.length > 30) {
           const saved = await savePost({
-            external_id: `x_${uid()}`,
+            external_id: `${platform}_${uid()}`,
             competitor_handle: query.substring(0, 50),
-            platform: 'x',
+            platform,
             source_type: 'trend_research',
             content_preview: text.substring(0, 500),
             scraped_at: new Date().toISOString()
@@ -261,9 +201,19 @@ async function scrapeX(page) {
     } catch (err) {
       console.warn(`    Erro: ${err.message.substring(0, 80)}`)
     }
-    await page.waitForTimeout(2000 + Math.random() * 2000)
+    await page.waitForTimeout(1500 + Math.random() * 1500)
   }
   return count
+}
+
+async function scrapeLinkedIn(page) {
+  const queries = RESEARCH_QUERIES.linkedin.map(q => `site:linkedin.com ${q}`)
+  return scrapeDuckDuckGo(page, queries, 'linkedin', '💼 PESQUISA — LinkedIn (via DuckDuckGo)')
+}
+
+async function scrapeX(page) {
+  const queries = RESEARCH_QUERIES.x_nitter.map(q => `site:x.com ${q}`)
+  return scrapeDuckDuckGo(page, queries, 'x', '🐦 PESQUISA — X/Twitter (via DuckDuckGo)')
 }
 
 // --- REDDIT: Direto (publico, sem login) ---
@@ -272,24 +222,32 @@ async function scrapeReddit(page) {
   let count = 0
 
   for (const config of RESEARCH_QUERIES.reddit) {
-    const jsonUrl = config.query
-      ? `https://www.reddit.com/r/${config.sub}/search.json?q=${encodeURIComponent(config.query)}&restrict_sr=on&sort=relevance&t=week&limit=8`
-      : `https://www.reddit.com/r/${config.sub}/${config.sort || 'hot'}.json?limit=8`
-
     console.log(`  r/${config.sub}${config.query ? ` "${config.query}"` : ''}...`)
     try {
-      // Reddit JSON API (publico, sem login)
-      const res = await fetch(jsonUrl, {
-        headers: { 'User-Agent': 'ContentTeamAI/1.0 (research bot)' }
+      // Reddit via DuckDuckGo (mais confiavel que acessar direto)
+      const ddgQuery = config.query
+        ? `site:reddit.com/r/${config.sub} ${config.query}`
+        : `site:reddit.com/r/${config.sub} AI`
+      await page.goto(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(ddgQuery)}`, {
+        waitUntil: 'domcontentloaded', timeout: 15000
       })
-      const json = await res.json()
-      const children = json?.data?.children || []
+      await page.waitForTimeout(2000)
 
-      const posts = children.map(c => ({
-        title: c.data?.title || '',
-        score: c.data?.score || 0,
-        url: `https://reddit.com${c.data?.permalink || ''}`
-      })).filter(p => p.title.length > 15)
+      const posts = await page.evaluate(() => {
+        const items = []
+        document.querySelectorAll('.result').forEach(el => {
+          const titleEl = el.querySelector('.result__title a, .result__a')
+          const snippetEl = el.querySelector('.result__snippet')
+          if (titleEl && snippetEl) {
+            items.push({
+              title: titleEl.textContent.trim(),
+              score: '?',
+              url: ''
+            })
+          }
+        })
+        return items.slice(0, 8).filter(p => p.title.length > 15)
+      })
 
       for (const post of posts) {
         if (post.title.length > 15) {
