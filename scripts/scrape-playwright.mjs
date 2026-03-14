@@ -31,9 +31,9 @@ const COMPETITORS_IG = [
 
 const RESEARCH_QUERIES = {
   linkedin: [
-    'site:linkedin.com/posts "agentes de IA" OR "AI agents" gestores',
-    'site:linkedin.com/posts "automacao com IA" OR "AI automation" empresas resultados',
-    'site:linkedin.com/pulse "inteligencia artificial" negocios cases'
+    'agentes de IA para gestores de empresas cases reais',
+    'automacao inteligente IA resultados empresas PME',
+    'inteligencia artificial negocios gestao equipes'
   ],
   x_nitter: [
     // Nitter mirrors publicos (sem login)
@@ -251,7 +251,7 @@ async function scrapeReddit() {
     } catch (err) {
       console.warn(`    Erro: ${err.message.substring(0, 80)}`)
     }
-    await page.waitForTimeout(1500 + Math.random() * 1500)
+    await new Promise(r => setTimeout(r, 500))
   }
   return count
 }
