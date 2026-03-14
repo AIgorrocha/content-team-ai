@@ -27,42 +27,41 @@ const COMPETITORS_IG = [
   'noevarner.ai', 'liamjohnston.ai', 'odanilogato', 'thaismartan', 'forgoodcode'
 ]
 
-// --- PESQUISA: Tendencias filtradas pro publico-alvo ---
-// Termos escolhidos pra gestores PME, nao-tecnicos, automacao pratica
+// --- PESQUISA: Focada em agentes IA, sistemas com IA, cases pra gestores ---
 const LINKEDIN_SEARCHES = [
-  'IA para pequenas empresas automacao',
-  'AI automation business results ROI',
-  'agentes de IA para gestores',
-  'n8n automacao sem codigo',
-  'Claude AI business use cases',
-  'inteligencia artificial gestao PME'
+  'agentes de inteligencia artificial para empresas cases',
+  'como usar IA na gestao de equipes resultados',
+  'sistema multiagente IA automacao empresarial',
+  'Claude AI agentes autonomos implementacao',
+  'IA para escritorios contabilidade advocacia engenharia',
+  'cases reais automacao IA pequenas empresas Brasil'
 ]
 
 const X_SEARCHES = [
-  'AI automation tools trending',
-  'Claude AI new features',
-  'n8n automation workflow',
-  'AI agents for business 2026',
-  'no-code AI automation',
-  'best AI tools productivity'
+  'AI agents for business managers results',
+  'Claude Code AI agent automation',
+  'multi-agent systems real world use cases',
+  'AI replacing manual tasks business',
+  'n8n AI agents workflow automation',
+  'AI consulting small business ROI'
 ]
 
 const REDDIT_SEARCHES = [
-  'site:reddit.com/r/artificial AI business automation',
-  'site:reddit.com/r/ChatGPT best use cases business',
-  'site:reddit.com/r/ClaudeAI workflow automation',
-  'site:reddit.com/r/AutomateYourself AI tools',
-  'site:reddit.com/r/smallbusiness AI automation'
+  'site:reddit.com/r/ClaudeAI agents automation business',
+  'site:reddit.com/r/artificial AI agents real use cases',
+  'site:reddit.com/r/ChatGPT business automation managers',
+  'site:reddit.com/r/AutomateYourself AI agent workflow',
+  'site:reddit.com/r/smallbusiness AI implementation results'
 ]
 
-// GitHub: repos trending que podem virar conteudo ou produto
+// GitHub: repos de agentes IA, Claude Code, sistemas multiagente
 const GITHUB_SEARCHES = [
-  'AI automation agents stars:>500',
-  'no-code AI workflow stars:>300',
-  'Claude API tools stars:>200',
-  'n8n templates automation stars:>100',
-  'AI business tools open source stars:>500',
-  'whatsapp bot AI stars:>300'
+  'Claude Code AI agent stars:>200',
+  'multi agent AI system stars:>500',
+  'AI agent framework business stars:>300',
+  'n8n AI agent workflow stars:>100',
+  'Claude API agent automation stars:>200',
+  'AI business automation open source stars:>300'
 ]
 
 async function webSearch(query) {
