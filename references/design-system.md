@@ -34,6 +34,10 @@
 | Fundo | #0D0D0D |
 | Texto | #FFFFFF |
 
+<!-- NOTA: O design system usa fundo PRETO (#0D0D0D). Em algum momento houve discussao
+     sobre fundo BEGE, mas o padrao atual aprovado e PRETO. Se houver mudanca futura,
+     atualizar aqui E no carousel-generator/SKILL.md. Ultima verificacao: 2026-03-14 -->
+
 ## Brand Voice
 
 Direto, pratico, sem rodeios. Fala como consultor senior que ja implementou.
