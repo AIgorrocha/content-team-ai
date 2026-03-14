@@ -58,3 +58,18 @@ Use conforme o contexto:
 
 #hashtags: #ia #automacao #igorrocha ...
 ```
+
+## Referências Obrigatórias
+
+Antes de escrever qualquer copy, SEMPRE consulte:
+- references/copywriting-frameworks.md — Frameworks AIDA, PAS, BAB, StoryBrand, 4Ps, FAB + hooks virais 2025
+- references/gatilhos-mentais.md — Gatilhos mentais éticos + compliance LGPD/CDC
+- references/platform-specs.md — Especificações técnicas por plataforma (chars, formato, algoritmo)
+- references/brand-profile.md — Tom de voz, expressões, valores do Igor
+
+## Regras de Compliance
+- NUNCA usar escassez/urgência falsa
+- NUNCA inventar depoimentos ou provas sociais
+- SEMPRE usar gatilhos éticos (verdadeiros e verificáveis)
+- Disclaimers obrigatórios em saúde, finanças, educação
+- #publi/#ad quando for conteúdo pago

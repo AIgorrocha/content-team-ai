@@ -63,3 +63,12 @@ Principais: ct_content_items, ct_tasks, ct_competitors, ct_design_system.
 Direto, pratico, sem rodeios. Fala como consultor senior que ja implementou.
 Nao ensina ferramenta, entrega resultado. Tom confiante mas acessivel.
 Usa analogias do dia a dia. Evita jargao tecnico desnecessario.
+
+## Referências do Sistema
+
+Todos os agentes devem consultar antes de produzir:
+- references/platform-specs.md — Specs técnicas por plataforma
+- references/copywriting-frameworks.md — Frameworks de copy
+- references/gatilhos-mentais.md — Gatilhos éticos + compliance
+- references/brand-profile.md — Perfil e tom de voz
+- references/carousel-standards.md — Regras de carrossel
