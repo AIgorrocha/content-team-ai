@@ -68,6 +68,30 @@ Automacao inteligente com agentes de IA para empresas.
 4. **Resultado** — Impacto/beneficio mensuravel
 5. **CTA** — Pergunta ou convite ("Comenta X que te mando")
 
+## Regras de Hashtags
+
+- **SEMPRE exatamente 5 hashtags** por post. Nunca mais, nunca menos.
+- Priorizar hashtags com volume medio (nao genericas demais, nao nichadas demais)
+- Misturar: 2 do nicho (ex: #agentesia #claudeai) + 2 de alcance (ex: #produtividade #automacao) + 1 de comunidade (ex: #devbrasil)
+- Hashtags devem ser relevantes ao conteudo especifico do post
+
+### Banco de Hashtags por Tema
+
+**IA e Automacao:**
+#inteligenciaartificial #automacao #agentesia #iaparaempresas #ianotrabalho
+
+**Claude/Ferramentas:**
+#claudeai #claudecode #claudecowork #n8nautomation #supabase
+
+**Produtividade/Gestao:**
+#produtividade #gestao #empreendedorismo #pmebrasil #gestaointeligente
+
+**Tech Brasil:**
+#devbrasil #techbrasil #programacao #iabrasil #startupbrasil
+
+**Engenharia/BIM:**
+#bim #engenharia #projetobim #construcaocivil #engenhariacivil
+
 ## Diferenciais
 
 - Integra engenharia + IA + cloud (raro no mercado)
