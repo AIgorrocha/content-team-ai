@@ -3,6 +3,10 @@ node_modules/
 *.png
 *.jpg
 !skills/carousel-generator/assets/igor-photo.jpg
+!content/**/*.png
+!content/**/*.jpg
+!assets/**/*.png
+!assets/**/*.jpg
 carousel-temp/
 .DS_Store
 Thumbs.db

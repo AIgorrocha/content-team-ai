@@ -106,6 +106,59 @@ Dominos: Core (agents, tasks, audit), Content (items, series), CRM (stages, cont
 6. **Auth:** Middleware que valida cookie com AUTH_TOKEN em todas as rotas
 7. **Types:** Importar de `@/lib/types` para type safety
 
+## Workflow de Criacao de Conteudo (Carrossei Instagram)
+
+### Como funciona
+
+1. **Criar slides** - O script `content/carousels/*/generate-slides.js` gera os PNGs usando Playwright + HTML
+2. **Revisar** - Confira os slides gerados na pasta `content/carousels/*/`
+3. **Publicar** - Rode o script de postagem que faz upload pro Supabase e publica via Instagram Graph API
+
+### Publicar um carrossel
+
+```bash
+# Do PC (Claude Code ou terminal)
+node scripts/post-carousel.mjs content/carousels/claude-cowork/slide-*.png --caption="Sua legenda aqui"
+
+# Do iPad/iPhone (via Termius SSH no servidor)
+cd /root/content-team-ai
+node scripts/post-carousel.mjs content/carousels/claude-cowork/slide-*.png --caption="Sua legenda"
+```
+
+### Estrutura de assets
+
+```
+content/
+  carousels/
+    claude-cowork/          # Primeiro carrossel (18 slides)
+      generate-slides.js    # Script que gera os PNGs
+      igor-photo.jpg        # Foto do autor usada nos slides
+      slide-01.png ... slide-18.png
+  references/
+    forgoodcode/            # Referencias visuais do post original
+assets/
+  photos/
+    igor-profile.png        # Foto de perfil
+    igor-photo.jpg          # Foto oficial para slides
+scripts/
+  post-carousel.mjs         # Script de publicacao Instagram
+```
+
+### Variaveis de ambiente necessarias
+
+Copie `.env.example` para `.env` e preencha com seus tokens:
+- `SUPABASE_URL` - URL do projeto Supabase (bucket `instagram-posts`)
+- `SUPABASE_SERVICE_ROLE_KEY` - Chave service role do Supabase
+- `INSTAGRAM_USER_ID` - ID do usuario Instagram Business
+- `INSTAGRAM_ACCESS_TOKEN` - Token de acesso da Graph API
+
+### Usar do iPad/iPhone
+
+1. Abra o **Termius** e conecte no servidor via SSH
+2. `cd /root/content-team-ai`
+3. Rode o comando de publicacao acima
+4. O script mostra o link do post publicado
+
 ## Docs BMAD
 
 - `docs/product-brief-*.md` - Visao geral do produto
