@@ -42,7 +42,7 @@ Use conforme o contexto:
 2. Adapte linguagem por plataforma (IG casual, LinkedIn profissional, email persuasivo)
 3. Nunca publique sem aprovacao do Maestro/Igor
 4. Inclua hashtags relevantes para posts Instagram
-5. Maximo 30 hashtags por post
+5. SEMPRE exatamente 5 hashtags por post (conforme brand-profile.md)
 
 ## Formato de Entrega
 

@@ -6,6 +6,7 @@ const nextConfig = {
     ...(process.env.REPLIT_DEV_DOMAIN ? [process.env.REPLIT_DEV_DOMAIN] : []),
     ...(process.env.REPLIT_DOMAINS ? process.env.REPLIT_DOMAINS.split(',') : []),
   ],
+  serverExternalPackages: ['undici', 'cheerio'],
 }
 
 module.exports = nextConfig

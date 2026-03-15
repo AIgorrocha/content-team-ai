@@ -50,7 +50,7 @@ Usuario (Igor) → Maestro (ct-maestro)
 | Supabase | Todas as 30 tabelas ct_* |
 | Playwright | Carrosseis, scraping |
 | Obsidian | Knowledge base |
-| n8n | Automacoes agendadas |
+| Agent SDK | Orquestracao de agentes via Claude SDK |
 
 ## Skills Disponiveis
 

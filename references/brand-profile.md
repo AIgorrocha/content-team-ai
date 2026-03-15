@@ -55,7 +55,7 @@ Automacao inteligente com agentes de IA para empresas.
 
 1. **Automacao pratica** — Como automatizar tarefas do dia a dia com IA
 2. **IA para gestores** — IA explicada sem jargao, com analogias
-3. **Ferramentas** — Reviews e tutoriais (Claude, n8n, Supabase, etc)
+3. **Ferramentas** — Reviews e tutoriais (Claude Code, Agent SDK, OpenClaw, Supabase)
 4. **Cases** — Resultados reais de implementacoes com numeros
 5. **Bastidores** — Como funciona por tras dos panos, stack real
 6. **Agentes de IA** — Sistemas multiagentes, delegacao, automacao
@@ -81,7 +81,7 @@ Automacao inteligente com agentes de IA para empresas.
 #inteligenciaartificial #automacao #agentesia #iaparaempresas #ianotrabalho
 
 **Claude/Ferramentas:**
-#claudeai #claudecode #claudecowork #n8nautomation #supabase
+#claudeai #claudecode #claudecowork #agentsdk #supabase
 
 **Produtividade/Gestao:**
 #produtividade #gestao #empreendedorismo #pmebrasil #gestaointeligente
