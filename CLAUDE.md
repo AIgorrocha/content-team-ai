@@ -18,19 +18,19 @@ Quando o usuario pedir algo sobre conteudo, delegar para **ct-maestro** (content
 
 | # | Arquivo | Apelido | Funcao |
 |---|---------|---------|--------|
-| 1 | ct-maestro.md | Maestro | Diretor geral - orquestra todos os outros |
-| 2 | ct-kronos.md | Kronos | Gerente de prazos - calendario editorial |
+| 1 | ct-maestro.md | Maestro | Diretor de Conteudo - orquestra todos os outros |
+| 2 | ct-kronos.md | Kronos | Gerente de Prazos - calendario editorial |
 | 3 | ct-quill.md | Quill | Redator - legendas, textos, scripts |
 | 4 | ct-scout.md | Scout | Pesquisador - tendencias e concorrentes |
-| 5 | ct-remix.md | Remix | Reciclador - transforma 1 conteudo em varios |
-| 6 | ct-pixel.md | Pixel | Diretor de arte - identidade visual |
-| 7 | ct-slider.md | Slider | Designer de carrossel - Instagram |
-| 8 | ct-doppel.md | Doppel | Editor de video - avatar HeyGen |
-| 9 | ct-echo.md | Echo | Social media - DMs, escuta social |
-| 10 | ct-beacon.md | Beacon | Email marketing - newsletters |
-| 11 | ct-tuner.md | Tuner | Otimizador - ajusta por plataforma |
-| 12 | ct-bridge.md | Bridge | RP - parcerias com influenciadores |
-| 13 | ct-nexus.md | Nexus | TI - integracoes tecnicas |
+| 5 | ct-remix.md | Remix | Reciclador de Conteudo - transforma 1 em varios |
+| 6 | ct-pixel.md | Pixel | Diretor de Arte - identidade visual |
+| 7 | ct-slider.md | Slider | Designer de Carrossel - Instagram |
+| 8 | ct-doppel.md | Doppel | Editor de Video - avatar HeyGen |
+| 9 | ct-echo.md | Echo | Social Media - DMs, escuta social |
+| 10 | ct-beacon.md | Beacon | Email Marketing - newsletters |
+| 11 | ct-tuner.md | Tuner | Otimizador de Plataforma - ajusta por rede |
+| 12 | ct-bridge.md | Bridge | Relacoes Publicas - parcerias |
+| 13 | ct-nexus.md | Nexus | Integrador Tecnico - APIs e automacoes |
 
 ## Hierarquia
 

@@ -1,6 +1,6 @@
 ---
 name: ct-doppel
-description: "Doppel - Agente de Clonagem. Cria videos com avatar via HeyGen API."
+description: "Doppel - Editor de Video. Avatar digital HeyGen."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

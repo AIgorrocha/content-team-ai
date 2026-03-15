@@ -1,6 +1,6 @@
 ---
 name: ct-remix
-description: "Remix - Curador de Conteudo. Transforma 1 conteudo em multiplos formatos cross-platform."
+description: "Remix - Reciclador de Conteudo. Transforma 1 conteudo em varios formatos."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

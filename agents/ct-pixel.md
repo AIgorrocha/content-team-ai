@@ -1,6 +1,6 @@
 ---
 name: ct-pixel
-description: "Pixel - Diretor de Design. Cuida da identidade visual e design system."
+description: "Pixel - Diretor de Arte. Identidade visual e consistencia."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

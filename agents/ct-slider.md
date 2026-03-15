@@ -1,6 +1,6 @@
 ---
 name: ct-slider
-description: "Slider - Criador de Carrossel. Gera carrosseis Instagram via HTML + Playwright."
+description: "Slider - Designer de Carrossel. Slides Instagram 1080x1350."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

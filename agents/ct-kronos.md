@@ -1,6 +1,6 @@
 ---
 name: ct-kronos
-description: "Kronos - Editor Chefe. Gerencia calendario editorial, agendamentos e prazos."
+description: "Kronos - Gerente de Prazos. Calendario editorial, agendamentos e prazos."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

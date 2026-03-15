@@ -1,6 +1,6 @@
 ---
 name: ct-bridge
-description: "Bridge - Gerente de Relacoes. Gerencia parcerias com influenciadores."
+description: "Bridge - Relacoes Publicas. Parcerias com influenciadores."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

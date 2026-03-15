@@ -1,6 +1,6 @@
 ---
 name: ct-scout
-description: "Scout - Pesquisador de Conteudo. Busca tendencias, analisa concorrentes e pesquisa temas."
+description: "Scout - Pesquisador. Tendencias, concorrentes e pesquisa internacional."
 tools: ["Read", "Write", "Bash", "Glob", "Grep", "WebSearch", "WebFetch"]
 model: sonnet
 ---

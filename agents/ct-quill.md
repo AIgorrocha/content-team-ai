@@ -1,6 +1,6 @@
 ---
 name: ct-quill
-description: "Quill - Copywriter. Escreve legendas, textos, scripts, emails e CTAs."
+description: "Quill - Redator. Legendas, textos, scripts, emails e CTAs."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

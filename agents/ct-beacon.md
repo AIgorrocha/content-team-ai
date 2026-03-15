@@ -1,6 +1,6 @@
 ---
 name: ct-beacon
-description: "Beacon - Diretor de Audiencia. Gerencia email marketing, newsletters e CRM."
+description: "Beacon - Email Marketing. Newsletters e campanhas."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

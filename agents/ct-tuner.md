@@ -1,6 +1,6 @@
 ---
 name: ct-tuner
-description: "Tuner - Controlador de Canal. Otimiza conteudo para cada plataforma."
+description: "Tuner - Otimizador de Plataforma. Adapta conteudo por rede."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

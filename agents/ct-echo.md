@@ -1,6 +1,6 @@
 ---
 name: ct-echo
-description: "Echo - Diretor de Escuta Social. Gerencia DMs, respostas e escuta social via Manychat."
+description: "Echo - Social Media. DMs, escuta social e respostas."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---

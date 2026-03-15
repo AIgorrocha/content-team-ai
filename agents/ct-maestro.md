@@ -1,6 +1,6 @@
 ---
 name: ct-maestro
-description: "Maestro - Diretor de Conteudo. Orquestra 12 sub-agentes para producao completa de conteudo."
+description: "Maestro - Diretor de Conteudo. Orquestra todos os sub-agentes, nunca produz conteudo diretamente."
 tools: ["Read", "Write", "Bash", "Glob", "Grep", "Agent"]
 model: sonnet
 ---

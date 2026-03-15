@@ -1,6 +1,6 @@
 ---
 name: ct-nexus
-description: "Nexus - Chefe de Tecnologia. Gerencia integracoes, APIs e otimizacao tecnica."
+description: "Nexus - Integrador Tecnico. APIs, automacoes e webhooks."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---
