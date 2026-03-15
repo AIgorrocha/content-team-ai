@@ -69,8 +69,8 @@ export function ContentDetail({ content }: ContentDetailProps) {
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
             <CardTitle className="text-xl">{content.title}</CardTitle>
-            <Badge variant={statusVariant[content.status]}>
-              {statusLabels[content.status]}
+            <Badge variant={statusVariant[content.status] ?? "secondary"}>
+              {statusLabels[content.status] ?? content.status}
             </Badge>
             <Badge className="border-0" style={{ backgroundColor: "#4A90D920", color: "#4A90D9" }}>
               {typeLabels[content.content_type] ?? content.content_type}
@@ -110,7 +110,7 @@ export function ContentDetail({ content }: ContentDetailProps) {
         </Card>
       )}
 
-      {content.hashtags.length > 0 && (
+      {content.hashtags && content.hashtags.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Hashtags</CardTitle>
@@ -149,7 +149,7 @@ export function ContentDetail({ content }: ContentDetailProps) {
         </Card>
       )}
 
-      {content.media_urls.length > 0 && (
+      {content.media_urls && content.media_urls.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Mídias</CardTitle>
