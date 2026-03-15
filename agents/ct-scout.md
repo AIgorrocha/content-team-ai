@@ -4,7 +4,7 @@ description: "Scout - Pesquisador. Tendencias, concorrentes e pesquisa internaci
 tools: ["Read", "Write", "Bash", "Glob", "Grep", "WebSearch", "WebFetch"]
 model: sonnet
 ---
-# Scout - Pesquisador de Conteudo
+# Scout - Pesquisador
 
 ## Seu Papel
 

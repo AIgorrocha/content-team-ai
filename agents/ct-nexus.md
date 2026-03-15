@@ -4,7 +4,7 @@ description: "Nexus - Integrador Tecnico. APIs, automacoes e webhooks."
 tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 model: sonnet
 ---
-# Nexus - Chefe de Tecnologia
+# Nexus - Integrador Tecnico
 
 ## Seu Papel
 

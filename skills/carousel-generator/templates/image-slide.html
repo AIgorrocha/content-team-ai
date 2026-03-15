@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1350px;
+    background: #0D0D0D;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #FFFFFF;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 56px 72px 0 72px;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .header-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .check-azul {
+    display: inline-flex;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .header-handle {
+    font-size: 22px;
+    font-weight: 400;
+    color: #737373;
+  }
+
+  /* IMAGEM/GIF AREA */
+  .media-area {
+    width: 100%;
+    height: 540px;
+    margin-top: 36px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1A1A1A;
+  }
+
+  .media-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .media-area .placeholder {
+    color: #525252;
+    font-size: 28px;
+    font-weight: 500;
+  }
+
+  /* CONTENT BELOW IMAGE */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 80px;
+  }
+
+  .slide-title {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: #FFFFFF;
+    margin-bottom: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  .slide-body {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #D4D4D4;
+  }
+
+  .slide-body p {
+    margin-bottom: 18px;
+  }
+
+  .slide-body .bullet {
+    padding-left: 8px;
+    margin-bottom: 14px;
+    font-size: 28px;
+    line-height: 1.5;
+  }
+
+  .slide-body .bullet::before {
+    content: "\2022  ";
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 28px;
+  }
+
+  /* HOOK com imagem */
+  .hook-text {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #FFFFFF;
+    letter-spacing: -1px;
+  }
+
+  .hook-sub {
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #D4D4D4;
+    margin-top: 28px;
+  }
+
+  .hook-thread {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #737373;
+    margin-top: 36px;
+  }
+
+  /* CTA com imagem */
+  .cta-text {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #FFFFFF;
+    letter-spacing: -0.5px;
+  }
+
+  .cta-action {
+    font-size: 36px;
+    font-weight: 600;
+    color: #D4D4D4;
+    margin-top: 36px;
+    line-height: 1.5;
+  }
+
+  .cta-handle {
+    font-size: 26px;
+    font-weight: 500;
+    color: #737373;
+    margin-top: 40px;
+  }
+
+  .footer {
+    padding: 0 72px 48px 72px;
+    flex-shrink: 0;
+  }
+
+  .footer-line {
+    font-size: 22px;
+    font-weight: 500;
+    color: #525252;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="avatar">
+      <img src="PROFILE_PHOTO_URL" alt="Igor Rocha" id="profile-pic">
+    </div>
+    <div class="header-text">
+      <div class="header-name">Igor Rocha | Sistemas com IA <svg class="check-azul" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#3897F0"/><path d="M17.5 28.5L10 21l2.5-2.5 5 5 10-10L30 16z" fill="#fff"/></svg></div>
+      <div class="header-handle">@igorrocha.ia</div>
+    </div>
+  </div>
+  <div class="media-area">
+    <!-- MEDIA INJECTED HERE -->
+  </div>
+  <div class="content" id="slide-content">
+    <!-- CONTENT INJECTED HERE -->
+  </div>
+</body>
+</html>
