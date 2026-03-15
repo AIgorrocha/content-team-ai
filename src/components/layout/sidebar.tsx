@@ -16,6 +16,7 @@ import {
   Eye,
   UserPlus,
   Palette,
+  Cpu,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -36,6 +37,7 @@ const navItems = [
   { href: "/competitors", label: "Concorrentes", icon: Eye },
   { href: "/influencers", label: "Influencers", icon: UserPlus },
   { href: "/design", label: "Design", icon: Palette },
+  { href: "/config", label: "Sistema", icon: Cpu },
   { href: "/settings", label: "Config", icon: Settings },
 ]
 

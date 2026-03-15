@@ -11,3 +11,4 @@ node_modules/
 carousel-temp/
 .DS_Store
 Thumbs.db
+.vercel

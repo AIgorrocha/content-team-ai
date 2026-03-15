@@ -72,22 +72,18 @@ Automacao inteligente com agentes de IA para empresas.
 
 - **SEMPRE exatamente 5 hashtags** por post. Nunca mais, nunca menos.
 - Priorizar hashtags com volume medio (nao genericas demais, nao nichadas demais)
-- Misturar: 2 do nicho (ex: #agentesia #claudeai) + 2 de alcance (ex: #produtividade #automacao) + 1 de comunidade (ex: #devbrasil)
+- Hashtags OBRIGATORIAS em todo post: #solopreneur #iaagents #agentsia #ia
+- A 5a hashtag varia conforme o tema do post
 - Hashtags devem ser relevantes ao conteudo especifico do post
 
-### Banco de Hashtags por Tema
+### Hashtags Fixas (sempre usar)
+#solopreneur #iaagents #agentsia #ia + 1 variavel
 
-**IA e Automacao:**
-#inteligenciaartificial #automacao #agentesia #iaparaempresas #ianotrabalho
+### Banco de Hashtags Variaveis (5a hashtag)
 
-**Claude/Ferramentas:**
-#claudeai #claudecode #claudecowork #agentsdk #supabase
-
-**Produtividade/Gestao:**
-#produtividade #gestao #empreendedorismo #pmebrasil #gestaointeligente
-
-**Tech Brasil:**
-#devbrasil #techbrasil #programacao #iabrasil #startupbrasil
+**Automacao:** #automacao #iaparaempresas #produtividade
+**Gestao:** #gestao #empreendedorismo #pmebrasil
+**Tech:** #claudeai #claudecode #supabase
 
 **Engenharia/BIM:**
 #bim #engenharia #projetobim #construcaocivil #engenhariacivil

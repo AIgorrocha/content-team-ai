@@ -94,10 +94,14 @@ export async function runAgent(agentName, userPrompt, options = {}) {
 
           const handler = toolHandlers[block.name]
           let result
-          if (handler) {
-            result = await handler(block.input)
-          } else {
-            result = { success: false, error: `Tool desconhecida: ${block.name}` }
+          try {
+            if (handler) {
+              result = await handler(block.input)
+            } else {
+              result = { success: false, error: `Tool desconhecida: ${block.name}` }
+            }
+          } catch (toolError) {
+            result = { success: false, error: `Erro na tool ${block.name}: ${toolError.message}` }
           }
 
           // Log resultado da tool
