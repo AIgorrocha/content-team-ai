@@ -12,19 +12,31 @@ import 'dotenv/config'
 import { supabaseToolDefinition, handleSupabaseTool } from './tools/supabase.mjs'
 import { webSearchToolDefinition, webFetchToolDefinition, handleWebSearchTool, handleWebFetchTool } from './tools/web-search.mjs'
 import { telegramToolDefinition, handleTelegramTool } from './tools/telegram.mjs'
+import {
+  memoryReadToolDefinition, memoryWriteToolDefinition, memoryHandoffToolDefinition,
+  handleMemoryRead, handleMemoryWrite, handleMemoryHandoff,
+  loadMemoryContext, flushAgentMemory, getSessionId
+} from './tools/memory.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '../..')
 
 const client = new Anthropic()
 
-const TOOLS = [supabaseToolDefinition, webSearchToolDefinition, webFetchToolDefinition, telegramToolDefinition]
+const TOOLS = [
+  supabaseToolDefinition, webSearchToolDefinition, webFetchToolDefinition,
+  telegramToolDefinition, memoryReadToolDefinition, memoryWriteToolDefinition,
+  memoryHandoffToolDefinition
+]
 
 const toolHandlers = {
   supabase_query: handleSupabaseTool,
   web_search: handleWebSearchTool,
   web_fetch: handleWebFetchTool,
-  telegram_notify: handleTelegramTool
+  telegram_notify: handleTelegramTool,
+  memory_read: handleMemoryRead,
+  memory_write: handleMemoryWrite,
+  memory_handoff: handleMemoryHandoff
 }
 
 function loadAgentPrompt(agentName) {
@@ -46,13 +58,23 @@ function loadReference(filename) {
 export async function runAgent(agentName, userPrompt, options = {}) {
   const { maxTurns = 25, model = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' } = options
 
+  // Carregar contexto de memoria (MEMORY.md + ultimos 3 dias + handoffs Supabase)
+  const memoryContext = await loadMemoryContext()
+  console.log(`🧠 Memoria carregada (session: ${getSessionId().slice(-8)})`)
+
   const systemPrompt = [
     loadAgentPrompt(agentName),
     '\n\n## Referências\n',
     `### Brand Profile\n${loadReference('brand-profile.md')}`,
     `### Concorrentes\n${loadReference('competitors.md')}`,
+    `\n\n## Memoria do Sistema\n${memoryContext}`,
     `\n\nData atual: ${new Date().toISOString().split('T')[0]}`,
-    '\n\nREGRA CRÍTICA: Responda SEMPRE em português do Brasil. Zero inglês.'
+    '\n\nREGRA CRÍTICA: Responda SEMPRE em português do Brasil. Zero inglês.',
+    '\n\nTools de memoria disponíveis:',
+    '- memory_write: salvar decisoes, aprendizados e resultados importantes',
+    '- memory_read: buscar contexto de execucoes anteriores',
+    '- memory_handoff: passar contexto estruturado para o proximo agente no pipeline',
+    '\nAo finalizar, use memory_handoff para resumir o que voce fez e o que o proximo agente precisa saber.'
   ].join('\n')
 
   const messages = [{ role: 'user', content: userPrompt }]
@@ -79,6 +101,9 @@ export async function runAgent(agentName, userPrompt, options = {}) {
       // Log primeiras linhas do resultado
       const preview = finalResult.split('\n').slice(0, 5).join('\n')
       console.log(`📄 Preview: ${preview}`)
+
+      // Memory flush — salvar resultado antes de encerrar
+      await flushAgentMemory(agentName, finalResult)
 
       return finalResult
     }

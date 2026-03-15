@@ -6,6 +6,7 @@
  */
 import { runAgent } from './agent-runner.mjs'
 import { handleTelegramTool } from './tools/telegram.mjs'
+import { handleMemoryWrite } from './tools/memory.mjs'
 
 const REGRAS_GLOBAIS = `
 REGRAS OBRIGATÓRIAS (SIGA À RISCA):
@@ -79,6 +80,13 @@ async function weeklyResearch() {
     (5 ideias baseadas na pesquisa)
   `)
 
+  // Salvar resultado do Scout na memoria para os proximos agentes
+  await handleMemoryWrite({
+    content: `## Resultado Scout — Semana ${dateRange}\n${scoutResult}`,
+    category: 'resultado',
+    agent: 'ct-scout'
+  })
+
   // ETAPA 2: Quill — Ideias de conteúdo
   console.log('\n--- ETAPA 2: QUILL (Ideias) ---')
   const quillResult = await runAgent('ct-quill', `
@@ -86,8 +94,8 @@ async function weeklyResearch() {
 
     Gere 7 ideias de conteúdo para a semana de ${dateRange}.
 
-    PESQUISA DO SCOUT:
-    ${scoutResult.substring(0, 3000)}
+    IMPORTANTE: Use a tool memory_read com query "scout resultado semana" para ler a pesquisa completa do Scout.
+    Tambem busque no Supabase os dados mais recentes: ct_competitor_posts e ct_content_items com status "idea".
 
     PARA CADA IDEIA, escreva:
     1. Título (PT-BR, chamativo, direto)
